@@ -1,0 +1,26 @@
+body .icon{
+    background: url('../../icons/compare.png?spriteMerge&name=tests');
+}
+.icon-1{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/compress.png?spriteMerge');
+}
+.icon-2{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/diff.png?spriteMerge');
+}
+.icon-3{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/schema.png?spriteMerge');
+}
+.icon-4{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/rank.png?spriteMerge&target=test');
+}
+.test{
+    color: red;
+}
