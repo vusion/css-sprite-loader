@@ -13,10 +13,8 @@ const RawSource = require("webpack-sources").RawSource;
 class ImageSpritePlugin {
     constructor(options) {
         this.options = Object.assign({
-            property: 'icon-font',
-            types: ['ttf', 'eot', 'woff', 'svg'], // @bug: webfonts-generator
-            fontName: 'icon-font',
             output: './',
+            padding: PADDING,
         }, options);
     }
     apply(compiler) {
@@ -38,7 +36,7 @@ class ImageSpritePlugin {
                         Spritesmith.run({
                             src: paths,
                             algorithm: 'binary-tree',
-                            padding: PADDING,
+                            padding: this.options.padding,
                         }, (err, result) => {
                             if (err)
                                 rej(err);
