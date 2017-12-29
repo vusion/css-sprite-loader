@@ -1,9 +1,36 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "name": "css-sprite-loader",
+  "description": "A webpack loader to convert png into sprite image",
+  "version": "1.2.1",
+  "author": "moujintao <moujintaotest@163.com>",
+  "contributors": [
+    "Rainfore <rainforest92@126.com>"
+  ],
   "scripts": {
-    "webpack-dev-run": "./node_modules/.bin/webpack-dev-server --hot"
+    "test": "mocha --timeout 5000 ./tests/final.test.js",
+    "eslint": "eslint ./src",
+    "eslint-fix": "eslint ./src --fix"
   },
+  "main": "./index.js",
+  "repository": "vusion/css-sprite-loader",
+  "bugs": {
+    "url": "http://github.com/vusion/css-sprite-loader/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "css",
+    "icon",
+    "sprite",
+    "webpack",
+    "loader"
+  ],
+  "tags": [
+    "css",
+    "icon",
+    "sprite",
+    "webpack",
+    "loader"
+  ],
   "dependencies": {
     "css": "^2.2.1",
     "handlebars": "^4.0.10",

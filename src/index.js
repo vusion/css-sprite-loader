@@ -38,7 +38,7 @@ function analysisBackground(urlStr, basePath) {
         result.merge = needMerge;
         return result;
     });
-};
+}
 
 function ImageSpriteLoader(source) {
     const ast = css.parse(source);
