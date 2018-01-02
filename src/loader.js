@@ -7,7 +7,10 @@ const fs = require('fs');
 const plugin = require('./Plugin');
 
 function analysisBackground(urlStr, basePath) {
-    const url = BG_URL_REG.exec(urlStr)[1];
+    const reg = BG_URL_REG.exec(urlStr);
+    if (!reg)
+        return { merge: false };
+    const url = reg[1];
     const parts = url.split('?');
     let needMerge = false;
     const params = parts[1];
@@ -71,6 +74,6 @@ function ImageSpriteLoader(source) {
     });
 }
 
-ImageSpriteLoader.plugin = plugin;
+ImageSpriteLoader.Plugin = plugin;
 
 module.exports = ImageSpriteLoader;
