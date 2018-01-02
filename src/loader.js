@@ -9,7 +9,7 @@ const plugin = require('./Plugin');
 function analysisBackground(urlStr, basePath) {
     const reg = BG_URL_REG.exec(urlStr);
     if (!reg)
-        return { merge: false };
+        return Promise.resolve({ merge: false });
     const url = reg[1];
     const parts = url.split('?');
     let needMerge = false;
