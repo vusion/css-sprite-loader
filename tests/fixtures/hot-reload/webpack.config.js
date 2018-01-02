@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const plugin = require('../../../src/Plugin.js');
+const plugin = require('../../../index.js').plugin;
 const extractTextWebpackPlugin = require('extract-text-webpack-plugin');
 const commonExTract = new extractTextWebpackPlugin('css/common.css');
 
@@ -16,7 +16,7 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: commonExTract.extract({ fallback: 'style-loader', use: ['css-loader', require.resolve('../../../src/index.js')] }),
+                use: ['style-loader', 'css-loader', require.resolve('../../../index.js')],
             },
             { test: /\.png$/, use: ['file-loader', {
                 loader: 'url-loader',
@@ -28,6 +28,5 @@ module.exports = {
     },
     plugins: [
         new plugin(),
-        commonExTract,
     ],
 };
