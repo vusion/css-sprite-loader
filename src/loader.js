@@ -37,8 +37,8 @@ function analysisBackground(urlStr, basePath) {
                 });
             }
         }
-        if (!result.target)
-            result.target = 'background_sprite';
+        if (!result.group)
+            result.group = 'background_sprite';
         result.merge = needMerge;
         return result;
     });
