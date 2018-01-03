@@ -15,6 +15,7 @@ class ImageSpritePlugin {
         this.options = Object.assign({
             output: './',
             padding: PADDING,
+            spriteMark: 'sprite',
         }, options);
     }
     apply(compiler) {
@@ -100,7 +101,7 @@ function pickPicture(imageList) {
     const result = {};
     for (const name of Object.keys(imageList)) {
         const image = imageList[name];
-        let target = result[image.target];
+        let target = result[image.group];
         if (!target) {
             target = {
                 path: [],
@@ -109,7 +110,7 @@ function pickPicture(imageList) {
         }
         target.path.push(image.path);
         target.path2img[image.path] = image;
-        result[image.target] = target;
+        result[image.group] = target;
     }
     return result;
 }

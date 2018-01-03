@@ -7,7 +7,7 @@ you need add spriteMerge options after background image url
 
 ``` css
 .select {
-    background: url('../icons/compare.png?spriteMerge');
+    background: url('../icons/compare.png?sprite');
     color: #666;
 }
 ```
@@ -62,16 +62,24 @@ padding of sprite image
 - Type: `Number`
 - Default: `20`
 
+#### srpiteMark
+
+customize Whether add this image to sprite image mark
+
+- Type: `String`
+- Default: `sprite`
+
+
 ### background image url options 
 
-#### spriteMerge
+#### sprite
 
-Whether add this image to sprite image
+Whether add this image to sprite image, you can set srpiteMark in plugin and customize it
 
 - Type: `string`
 - Default: none
 
-#### target
+#### group
 
 sprite image name
 

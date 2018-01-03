@@ -64,17 +64,23 @@ module.exports = {
 
 - Type: `Number`
 - Default: `20`
+#### srpiteMark
+
+是否打入到sprite图中标记自定义
+
+- Type: `String`
+- Default: `sprite`
 
 ### background后缀传参
 
-#### spriteMerge
+#### sprite
 
-是否将当前图标打入sprite图中
+是否将当前图标打入sprite图中, 你可以通过设置plugin的spriteMark属性来控制
 
 - Type: `string`
 - Default: 无
 
-#### target
+#### group
 
 生成到目标sprite图的名称
 
