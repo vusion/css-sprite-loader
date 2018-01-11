@@ -4,11 +4,11 @@
 
 ## 示例
 
-在需要的背景图路径中增加spriteMerge后缀传参，loader自动将图标合并到雪碧图中
+在需要的背景图路径中增加sprite后缀传参，loader自动将图标合并到雪碧图中
 
 ``` css
 .select {
-    background: url('../icons/compare.png?spriteMerge');
+    background: url('../icons/compare.png?sprite');
     color: #666;
 }
 ```
@@ -33,14 +33,14 @@ npm install --save-dev css-sprite-loader
 除了在CSS中添加自定义属性，还需要在Webpack配置中添加一个Plugin。
 
 ```javascript
-const CsssSpritePlugin = require('css-sprite-loader').Plugin;
+const CssSpritePlugin = require('css-sprite-loader').Plugin;
 
 module.exports = {
     ...
     module: {
         rules: [{ test: /\.css$/, use: ['style-loader', 'css-loader', 'css-sprite-loader'] }],
     },
-    plugins: [new IconFontPlugin()],
+    plugins: [new CssSpritePlugin()],
 };
 ```
 
@@ -64,7 +64,7 @@ module.exports = {
 
 - Type: `Number`
 - Default: `20`
-#### srpiteMark
+#### spriteMark
 
 是否打入到sprite图中标记自定义
 
@@ -78,13 +78,6 @@ module.exports = {
 是否将当前图标打入sprite图中, 你可以通过设置plugin的spriteMark属性来控制
 
 - Type: `string`
-- Default: 无
-
-#### group
-
-生成到目标sprite图的名称
-
-- Type: `string`
-- Default: `background_sprite`
+- Default: 'background_sprite'
 
 

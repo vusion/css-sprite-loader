@@ -3,7 +3,7 @@
 this is a webpack loader  convert png into sprite png in CSS
 
 ## Example
-you need add spriteMerge options after background image url
+you need add sprite options after background image url
 
 ``` css
 .select {
@@ -31,14 +31,14 @@ npm install --save-dev css-sprite-loader
 You must import plugin below in webpack in addition to adding custom properties in CSS.
 
 ```javascript
-const CsssSpritePlugin = require('css-sprite-loader').Plugin;
+const CssSpritePlugin = require('css-sprite-loader').Plugin;
 
 module.exports = {
     ...
     module: {
         rules: [{ test: /\.css$/, use: ['style-loader', 'css-loader', 'css-sprite-loader'] }],
     },
-    plugins: [new IconFontPlugin()],
+    plugins: [new CssSpritePlugin()],
 };
 ```
 
@@ -77,13 +77,6 @@ customize Whether add this image to sprite image mark
 Whether add this image to sprite image, you can set srpiteMark in plugin and customize it
 
 - Type: `string`
-- Default: none
-
-#### group
-
-sprite image name
-
-- Type: `string`
-- Default: `background_sprite`
+- Default: 'background_sprite'
 
 
