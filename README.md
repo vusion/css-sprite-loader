@@ -18,7 +18,6 @@ will generate corresponding css so web browsers can recognize.
     background: url(/background_sprite.png?5d40e339682970eb14baf6110a83ddde) no-repeat;background-position: -100px -0px;
 }
 ```
-```
 
 ## Install
 
