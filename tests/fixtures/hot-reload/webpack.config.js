@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const plugin = require('../../../index.js').plugin;
+const plugin = require('../../../index.js').Plugin;
 const extractTextWebpackPlugin = require('extract-text-webpack-plugin');
 const commonExTract = new extractTextWebpackPlugin('css/common.css');
 

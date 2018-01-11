@@ -27,7 +27,7 @@ class ImageSpritePlugin {
             compilation.plugin('additional-assets', (callback) => {
                 // 生成静态资源
                 const images = this.images;
-                const imageList = pickPicture(images);
+                const imageList = pickPicture(images, this.options.spriteMark);
                 const task = [];
                 for (const target of Object.keys(imageList)) {
                     const paths = imageList[target].path;
@@ -97,11 +97,11 @@ class ImageSpritePlugin {
     }
 }
 
-function pickPicture(imageList) {
+function pickPicture(imageList, mark) {
     const result = {};
     for (const name of Object.keys(imageList)) {
         const image = imageList[name];
-        let target = result[image.group];
+        let target = result[image[mark]];
         if (!target) {
             target = {
                 path: [],
@@ -110,7 +110,7 @@ function pickPicture(imageList) {
         }
         target.path.push(image.path);
         target.path2img[image.path] = image;
-        result[image.group] = target;
+        result[image[mark]] = target;
     }
     return result;
 }

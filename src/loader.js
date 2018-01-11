@@ -1,6 +1,6 @@
 'use strict';
 
-const css = require('css');
+const css = require('postcss');
 const path = require('path');
 const BG_URL_REG = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)/i;
 const fs = require('fs');
@@ -27,18 +27,16 @@ function analysisBackground(urlStr, basePath) {
         result.path = file;
         if (params) {
             const paramsAst = params.split('&');
-            const spriteMerge = paramsAst.indexOf(spriteMark);
-            needMerge = spriteMerge > -1;
-            if (needMerge) {
-                paramsAst.splice(spriteMerge, 1);
-                paramsAst.forEach((item) => {
-                    const param = item.split('=');
-                    result[param[0]] = param[1];
-                });
-            }
+            paramsAst.forEach((item) => {
+                const param = item.split('=');
+                if (param[0] === spriteMark)
+                    needMerge = true;
+                result[param[0]] = param[1];
+            });
+            const spriteMerge = result[spriteMark];
+            if (spriteMerge === undefined)
+                result[spriteMark] = 'background_sprite';
         }
-        if (!result.group)
-            result.group = 'background_sprite';
         result.merge = needMerge;
         return result;
     });
@@ -48,17 +46,14 @@ function ImageSpriteLoader(source) {
     const ImageSpritePlugin = this.ImageSpritePlugin;
     const ast = css.parse(source);
     const imageList = ImageSpritePlugin.images;
-    const rules = Array.from(ast.stylesheet.rules);
+    const rules = Array.from(ast.nodes);
     const callback = this.async();
     const promises = [];
-    // customize merge mark
-    spriteMark = ImageSpritePlugin.options.spriteMark;
-    while (rules.length > 0) {
-        const rule = rules.pop();
-        const declarations = Array.from(rule.declarations || []);
-        while (declarations.length > 0) {
-            const declaration = declarations.pop();
-            if (declaration.property === 'background') {
+
+    const ruleWaker = (rule) => {
+        if (rule.type === 'decl' && !rule.nodes) {
+            const declaration = rule;
+            if (declaration.prop === 'background') {
                 promises.push(analysisBackground.call(this, declaration.value, this.context).then((imageUrl) => {
                     if (imageUrl.merge) {
                         const name = 'REPLACE_BACKGROUND(' + imageUrl.url + ')';
@@ -68,11 +63,24 @@ function ImageSpriteLoader(source) {
                     return imageUrl;
                 }));
             }
+        } else if (rule.nodes instanceof Array) {
+            const rules = Array.from(rule.nodes);
+            while (rules.length > 0) {
+                const childRule = rules.pop();
+                ruleWaker(childRule);
+            }
         }
-    }
+    };
+    // customize merge mark
+    spriteMark = ImageSpritePlugin.options.spriteMark;
+    ruleWaker(ast);
     Promise.all(promises).then(() => {
+        let cssStr = '';
+        css.stringify(ast, (str) => {
+            cssStr += str;
+        });
         // 第二遍replace真正替换
-        callback(null, css.stringify(ast));
+        callback(null, cssStr);
     }).catch((err) => {
         callback(err, source);
     });

@@ -62,7 +62,7 @@ padding of sprite image
 - Type: `Number`
 - Default: `20`
 
-#### srpiteMark
+#### spriteMark
 
 customize Whether add this image to sprite image mark
 
