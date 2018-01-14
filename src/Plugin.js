@@ -8,7 +8,7 @@ const Spritesmith = require('spritesmith');
 const Source = require('webpack-sources');
 const utils = require('./utils');
 const PADDING = 20;
-const RawSource = require("webpack-sources").RawSource;
+const RawSource = require('webpack-sources').RawSource;
 
 class ImageSpritePlugin {
     constructor(options) {
@@ -56,9 +56,7 @@ class ImageSpritePlugin {
                             source: () => result.image,
                             size: () => result.image.length,
                         };
-                    }).catch((err) => {
-                        return err;
-                    });
+                    }).catch((err) => err);
                     task.push(promiseInstance);
                 }
                 Promise.all(task).then((values) => {
@@ -68,15 +66,13 @@ class ImageSpritePlugin {
             compilation.plugin('optimize-chunk-assets', (chunks, callback) => {
                 const imageList = Object.keys(this.images);
                 const images = this.images;
-                const replaceReg = /REPLACE_BACKGROUND\([^\)]*\)/g;
+                const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
                 chunks.forEach((chunk) => {
                     chunk.files.forEach((file) => {
                         if (file.endsWith('.js') || file.endsWith('.css')) {
                             // 处理css模块
                             let content = compilation.assets[file].source();
-                            content = content.replace(replaceReg, (name) => {
-                                return images[name] ? images[name].replaceCss : name;
-                            })
+                            content = content.replace(replaceReg, (name) => images[name] ? images[name].replaceCss : name);
                             compilation.assets[file] = new RawSource(content);
                         }
                     });
