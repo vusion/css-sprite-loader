@@ -5,7 +5,9 @@ const path = require('path');
 const BG_URL_REG = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)/i;
 const fs = require('fs');
 const plugin = require('./Plugin');
-let spriteMark = 'sprite';
+let queryParam = 'sprite';
+let defaultName = 'background_sprite';
+let filter = 'query';
 
 function analysisBackground(urlStr, basePath) {
     const reg = BG_URL_REG.exec(urlStr);
@@ -29,13 +31,18 @@ function analysisBackground(urlStr, basePath) {
             const paramsAst = params.split('&');
             paramsAst.forEach((item) => {
                 const param = item.split('=');
-                if (param[0] === spriteMark)
+                if (filter === 'query') {
+                    if (param[0] === queryParam)
+                        needMerge = true;
+                } else if (filter === 'all')
                     needMerge = true;
+                else if (filter instanceof RegExp)
+                    needMerge = filter.test(url);
                 result[param[0]] = param[1];
             });
-            const spriteMerge = result[spriteMark];
+            const spriteMerge = result[queryParam];
             if (spriteMerge === undefined)
-                result[spriteMark] = 'background_sprite';
+                result[queryParam] = defaultName;
         }
         result.merge = needMerge;
         return result;
@@ -72,7 +79,9 @@ function ImageSpriteLoader(source) {
         }
     };
     // customize merge mark
-    spriteMark = ImageSpritePlugin.options.spriteMark;
+    queryParam = ImageSpritePlugin.options.queryParam;
+    defaultName = ImageSpritePlugin.options.defaultName;
+    filter = ImageSpritePlugin.options.filter;
     ruleWaker(ast);
     Promise.all(promises).then(() => {
         let cssStr = '';

@@ -15,7 +15,9 @@ class ImageSpritePlugin {
         this.options = Object.assign({
             output: './',
             padding: PADDING,
-            spriteMark: 'sprite',
+            queryParam: 'sprite',
+            defaultName: 'background_sprite',
+            filter: 'query',
         }, options);
     }
     apply(compiler) {
@@ -27,7 +29,7 @@ class ImageSpritePlugin {
             compilation.plugin('additional-assets', (callback) => {
                 // 生成静态资源
                 const images = this.images;
-                const imageList = pickPicture(images, this.options.spriteMark);
+                const imageList = pickPicture(images, this.options.queryParam);
                 const task = [];
                 for (const target of Object.keys(imageList)) {
                     const paths = imageList[target].path;

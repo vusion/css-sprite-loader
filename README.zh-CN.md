@@ -63,12 +63,26 @@ module.exports = {
 
 - Type: `Number`
 - Default: `20`
-#### spriteMark
+
+#### queryParam
 
 是否打入到sprite图中标记自定义
 
 - Type: `String`
 - Default: `sprite`
+#### defaultName
+
+默认打包的sprite图名称
+
+- Type: `String`
+- Default: `background_sprite`
+
+#### filter
+
+这个参数定义了图片是否打入到sprite图中的策略。如果是‘query’，loader只会打带有queryParam标记的图片url。如果是‘all’，loader将会把css中所有的引用图片都打入到sprite中。如果是正则表达式，loade只打符合正则表达式规则的图片url
+
+- Type: `String`
+- Default: `query`
 
 ### background后缀传参
 
