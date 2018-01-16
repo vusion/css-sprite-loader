@@ -60,7 +60,12 @@ padding of sprite image
 
 - Type: `Number`
 - Default: `20`
+#### filter
 
+this param define how to sprite png. you can set `query` `all` and a RegExp. when filter is`query`,we will sprite image have queryParam in url param.when filter is `all`, we will sprite all image is imported in css. and RegExp, we will test image url use this RegExp,and url without param.
+
+- Type: `String`
+- Default: `query`
 #### queryParam
 
 customize Whether add this image to sprite image mark
@@ -74,14 +79,6 @@ default sprite png name
 
 - Type: `String`
 - Default: `background_sprite`
-
-#### filter
-
-this param define how to sprite png. you can set `query` `all` and a RegExp. when filter is`query`,we will sprite image have queryParam in url param.when filter is `all`, we will sprite all image is imported in css. and RegExp, we will test image url,this url without param.
-
-- Type: `String`
-- Default: `query`
-
 
 ### background image url options 
 
