@@ -9,6 +9,17 @@ let queryParam = 'sprite';
 let defaultName = 'background_sprite';
 let filter = 'query';
 
+function getNextLoader(loader) {
+    const loaders = loader.loaders;
+    const previousRequest = loader.previousRequest;
+    const loaderContexts = loaders.map((loader) => {
+        return loader.normalExecuted;
+    });
+    const index = loaderContexts.lastIndexOf(false);
+    const nextLoader = loaders[index].normal;
+    return nextLoader;
+}
+
 function analysisBackground(urlStr, basePath) {
     const reg = BG_URL_REG.exec(urlStr);
     if (!reg)
@@ -51,11 +62,12 @@ function analysisBackground(urlStr, basePath) {
 
 function ImageSpriteLoader(source) {
     const ImageSpritePlugin = this.ImageSpritePlugin;
-    const ast = css.parse(source);
+    const ast = typeof source === 'string' ? css.parse(source) : source;
     const imageList = ImageSpritePlugin.images;
     const rules = Array.from(ast.nodes);
     const callback = this.async();
     const promises = [];
+    const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
 
     const ruleWaker = (rule) => {
         if (rule.type === 'decl' && !rule.nodes) {
@@ -85,16 +97,20 @@ function ImageSpriteLoader(source) {
     ruleWaker(ast);
     Promise.all(promises).then(() => {
         let cssStr = '';
-        css.stringify(ast, (str) => {
-            cssStr += str;
-        });
+        if (!acceptPostCssAst) {
+            css.stringify(ast, (str) => {
+                cssStr += str;
+            });
+        }
         // 第二遍replace真正替换
-        callback(null, cssStr);
+        callback(null, acceptPostCssAst ? ast : cssStr);
     }).catch((err) => {
         callback(err, source);
     });
 }
 
 ImageSpriteLoader.Plugin = plugin;
+
+ImageSpriteLoader.acceptPostCssAst = true;
 
 module.exports = ImageSpriteLoader;
