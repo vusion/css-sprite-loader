@@ -28,7 +28,7 @@ module.exports = {
     },
     plugins: [
         new plugin({
-            filter: /compress\.png$/g,
+            // filter: /compress\.png$/g,
             queryParam: 'test',
             defaultName: 'whatsthis',
         }),

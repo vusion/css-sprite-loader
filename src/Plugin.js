@@ -8,7 +8,7 @@ const Spritesmith = require('spritesmith');
 const Source = require('webpack-sources');
 const utils = require('./utils');
 const PADDING = 20;
-const RawSource = require('webpack-sources').RawSource;
+const ReplaceSource = require('webpack-sources').ReplaceSource;
 
 class ImageSpritePlugin {
     constructor(options) {
@@ -73,9 +73,12 @@ class ImageSpritePlugin {
                     chunk.files.forEach((file) => {
                         if (file.endsWith('.js') || file.endsWith('.css')) {
                             // 处理css模块
+                            const source = compilation.assets[file];
                             let content = compilation.assets[file].source();
                             content = content.replace(replaceReg, (name) => images[name] ? images[name].replaceCss : name);
-                            compilation.assets[file] = new RawSource(content);
+                            const replaceSource = new ReplaceSource(source);
+                            replaceSource.replace(0, source.size(), content);
+                            compilation.assets[file] = replaceSource;
                         }
                     });
                 });
