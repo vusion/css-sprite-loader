@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const url = require('url');
 const fs = require('fs');
 const shell = require('shelljs');
 const webpack = require('webpack');
@@ -34,7 +35,7 @@ class ImageSpritePlugin {
                 for (const target of Object.keys(imageList)) {
                     const paths = imageList[target].path;
                     const path2img = imageList[target].path2img;
-                    const imageUrl = path.join(compilation.options.output.publicPath || '', target + '.png');
+                    const imageUrl = url.resolve(compilation.options.output.publicPath || '', target + '.png');
                     const promiseInstance = new Promise((res, rej) => {
                         Spritesmith.run({
                             src: paths,
