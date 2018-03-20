@@ -73,7 +73,6 @@ class ImageSpritePlugin {
             compilation.plugin('optimize-chunk-assets', (chunks, callback) => {
                 const images = {};
                 for (const path of Object.keys(this.images)) {
-                    console.log(path);
                     const image = this.images[path];
                     images[image.name] = image;
                 }
