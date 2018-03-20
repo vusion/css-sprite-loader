@@ -1,16 +1,16 @@
 body .icon{
-    background: url('../../icons/compare.png?test=test');
+    background: url('../../icons/compare.png?sprite=test');
 }
 .icon-1{
     height: 100px;
     width: 100px;
-    background: url('../../icons/compress.png?test=test');
+    background: url('../../icons/compress.png?sprite=test');
 }
-.icon-2{
+/* .icon-2{
     height: 100px;
     width: 100px;
-    background: url('../../icons/diff.png?test');
-}
+    background: url('../../icons/diff.png?sprite');
+} */
 .icon-3{
     height: 100px;
     width: 100px;

@@ -28,7 +28,12 @@ class ImageSpritePlugin {
         compiler.plugin('this-compilation', (compilation, params) => {
             compilation.plugin('additional-assets', (callback) => {
                 // 生成静态资源
-                const images = this.images;
+                let imagePaths = Object.keys(this.images);
+                imagePaths = Array.from(new Set(imagePaths)).sort();
+                const images = {};
+                for (const path of imagePaths)
+                    images[path] = this.images[path];
+                this.images = images;
                 const imageList = pickPicture(images, this.options.queryParam);
                 const task = [];
                 for (const target of Object.keys(imageList)) {
@@ -66,8 +71,12 @@ class ImageSpritePlugin {
                 });
             });
             compilation.plugin('optimize-chunk-assets', (chunks, callback) => {
-                const imageList = Object.keys(this.images);
-                const images = this.images;
+                const images = {};
+                for (const path of Object.keys(this.images)) {
+                    console.log(path);
+                    const image = this.images[path];
+                    images[image.name] = image;
+                }
                 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
                 chunks.forEach((chunk) => {
                     chunk.files.forEach((file) => {
