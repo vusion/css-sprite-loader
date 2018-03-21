@@ -8,6 +8,7 @@ const plugin = require('./Plugin');
 let queryParam = 'sprite';
 let defaultName = 'background_sprite';
 let filter = 'query';
+const utils = require('./utils');
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
@@ -75,8 +76,17 @@ function ImageSpriteLoader(source) {
             if (declaration.prop === 'background') {
                 promises.push(analysisBackground.call(this, declaration.value, this.context).then((imageUrl) => {
                     if (imageUrl.merge) {
-                        const name = 'REPLACE_BACKGROUND(' + imageUrl.url + ')';
-                        imageList[name] = imageUrl;
+                        const path = imageUrl.path;
+                        let hash;
+                        if (imageList[path]) {
+                            hash = imageList[path].hash;
+                        } else {
+                            hash = utils.md5Create(path);
+                            imageUrl.hash = hash;
+                            imageList[path] = imageUrl;
+                        }
+                        const name = 'REPLACE_BACKGROUND(' + hash + ')';
+                        imageUrl.name = name;
                         declaration.value = name;
                     }
                     return imageUrl;
