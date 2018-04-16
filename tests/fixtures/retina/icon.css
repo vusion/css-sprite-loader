@@ -1,0 +1,8 @@
+body .icon{
+    background: url('../../icons/retina/avatar01.png?sprite=test&retina');
+}
+.icon-1{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/retina/avatar01.png?sprite=test&retina');
+}
