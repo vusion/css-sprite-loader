@@ -9,6 +9,7 @@ let queryParam = 'sprite';
 let defaultName = 'background_sprite';
 let filter = 'query';
 const utils = require('./utils');
+const sizeOf = require('image-size');
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
@@ -19,6 +20,30 @@ function getNextLoader(loader) {
     const index = loaderContexts.lastIndexOf(false);
     const nextLoader = loaders[index].normal;
     return nextLoader;
+}
+
+function getRetinaPath(path) {
+    const paths = path.split('/');
+    const lastPath = paths[paths.length-1];
+    const fileNames = lastPath.split('.');
+    let fileName = fileNames[0];
+    fileName = fileName+"x2";
+    fileNames[0] = fileName;
+    paths[paths.length-1] = fileNames.join('.');
+    return paths.join('/');
+}
+
+function getRetinaImage(image, name) {
+    const retina = image.retina;
+    if (retina){
+        const retinaImage = JSON.parse(JSON.stringify(image));
+        delete retinaImage.retina;
+        retinaImage.path = retina;
+        retinaImage.path = retina;
+        retinaImage[name] = image[name] + '_@2x';
+        return retinaImage;
+    } else
+        return undefined;
 }
 
 function analysisBackground(urlStr, basePath) {
@@ -50,6 +75,8 @@ function analysisBackground(urlStr, basePath) {
                     needMerge = true;
                 else if (filter instanceof RegExp)
                     needMerge = filter.test(url);
+                if(param[0]==='retina'&&!param[1])
+                    param[1] = getRetinaPath(file);
                 result[param[0]] = param[1];
             });
             const spriteMerge = result[queryParam];
@@ -61,6 +88,34 @@ function analysisBackground(urlStr, basePath) {
     });
 }
 
+function addImageToList(image, imageList, declaration) {
+    if (image.merge) {
+        const path = image.path;
+        let hash;
+        if (imageList[path]) {
+            hash = imageList[path].hash;
+        } else {
+            const filesContent = fs.readFileSync(path);
+            hash = utils.md5Create(filesContent);
+            image.hash = hash;
+            image.size = sizeOf(filesContent);
+            imageList[path] = image;
+        }
+        const name = 'REPLACE_BACKGROUND(' + hash + ')';
+        image.name = name;
+        declaration.value = name;
+        if(image.retina) {
+            return {
+                selector: declaration.parent.selector,
+                retinaPath: image.retina,
+                image,
+            }
+        }
+    };
+    return undefined;
+}
+
+
 function ImageSpriteLoader(source) {
     const ImageSpritePlugin = this.ImageSpritePlugin;
     const ast = typeof source === 'string' ? css.parse(source) : source;
@@ -69,51 +124,57 @@ function ImageSpriteLoader(source) {
     const callback = this.async();
     const promises = [];
     const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
-
-    const ruleWaker = (rule) => {
-        if (rule.type === 'decl' && !rule.nodes) {
-            const declaration = rule;
-            if (declaration.prop === 'background') {
-                promises.push(analysisBackground.call(this, declaration.value, this.context).then((imageUrl) => {
-                    if (imageUrl.merge) {
-                        const path = imageUrl.path;
-                        let hash;
-                        if (imageList[path]) {
-                            hash = imageList[path].hash;
-                        } else {
-                            hash = utils.md5Create(path);
-                            imageUrl.hash = hash;
-                            imageList[path] = imageUrl;
-                        }
-                        const name = 'REPLACE_BACKGROUND(' + hash + ')';
-                        imageUrl.name = name;
-                        declaration.value = name;
-                    }
-                    return imageUrl;
-                }));
-            }
-        } else if (rule.nodes instanceof Array) {
-            const rules = Array.from(rule.nodes);
-            while (rules.length > 0) {
-                const childRule = rules.pop();
-                ruleWaker(childRule);
-            }
-        }
-    };
     // customize merge mark
     queryParam = ImageSpritePlugin.options.queryParam;
     defaultName = ImageSpritePlugin.options.defaultName;
     filter = ImageSpritePlugin.options.filter;
-    ruleWaker(ast);
-    Promise.all(promises).then(() => {
-        let cssStr = '';
-        if (!acceptPostCssAst) {
-            css.stringify(ast, (str) => {
-                cssStr += str;
+
+    ast.walkDecls('background', (declaration) => {
+        promises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
+            const retina = addImageToList(image, imageList, declaration);
+            return retina;
+        }));
+    });
+    // ruleWaker(ast);
+    Promise.all(promises).then((results) => {
+        function finish() {
+            let cssStr = '';
+            if (!acceptPostCssAst) {
+                css.stringify(ast, (str) => {
+                    cssStr += str;
+                });
+            }
+            // 第二遍replace真正替换
+            callback(null, acceptPostCssAst ? ast : cssStr);
+        }
+        results = results.filter((result) => {
+            return !!result;
+        })
+        const retinaPromises = [];
+        if (results.length>0) {
+            // if have retina image add @media rule in ast end;
+            ast.append('@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 192dpi){}');
+            const mediaNode = ast.nodes[ast.nodes.length-1];
+            results.forEach((result) => {
+                const { selector, retinaPath ,image } = result;
+                mediaNode.append(`${selector}{background:url(${retinaPath}?${queryParam}=${image[queryParam]}_@2x&baseTarget=${image.path})}`);
+            });
+            mediaNode.walkDecls('background', (declaration) => {
+                retinaPromises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
+                    const retina = addImageToList(image, imageList, declaration);
+                    image.isRetina = true;
+                    // return retinaImages;
+                }));
             });
         }
-        // 第二遍replace真正替换
-        callback(null, acceptPostCssAst ? ast : cssStr);
+        if (retinaPromises.length===0){
+            finish();
+        }else {
+            Promise.all(retinaPromises).then(() => {
+                finish();
+            })
+        }
+       
     }).catch((err) => {
         callback(err, source);
     });

@@ -27,6 +27,7 @@ class ImageSpritePlugin {
         });
 
         compiler.plugin('this-compilation', (compilation, params) => {
+            const spriteImageSize = {};
             compilation.plugin('additional-assets', (callback) => {
                 // 生成静态资源
                 let imagePaths = Object.keys(this.images);
@@ -54,11 +55,16 @@ class ImageSpritePlugin {
                     }).then((result) => {
                         const coordinates = result.coordinates;
                         const assets = compilation.assets;
+                        spriteImageSize[target] = result.properties;
                         for (const path of Object.keys(coordinates)) {
                             const image = path2img[path];
+                            const baseTarget = image.baseTarget;
+                            let baseImage;
+                            if(baseTarget)
+                                baseImage = images[baseTarget];
                             image.message = coordinates[path];
                             image.message.hash = utils.md5Create(result.image);
-                            image.replaceCss = this.createCss(imageUrl, image.message);
+                            image.replaceCss = this.createCss(imageUrl, image.message, result.properties, image.isRetina, baseImage);
                         }
                         assets[path.join(this.options.output, target + '.png')] = {
                             source: () => result.image,
@@ -101,9 +107,18 @@ class ImageSpritePlugin {
             });
         });
     }
-    createCss(imageUrl, message) {
+    createCss(imageUrl, message, properties, isRetina, baseImage) {
         const { x, y, hash } = message;
-        return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px`;
+        const { width, height } = properties;
+        console.log();
+        if(isRetina){
+            const baseWidth = baseImage.size.width;
+            const baseHeight = baseImage.size.height;
+            const proportionWidth = baseWidth / width;
+            const proportionHeight = baseHeight / height;
+            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x*proportionHeight}px -${y*proportionHeight}px;background-size:${width*proportionWidth}px ${height*proportionHeight}px;`;
+        }else
+            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px`;
     }
 }
 
