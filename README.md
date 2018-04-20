@@ -90,3 +90,12 @@ Whether add this image to sprite image, you can set srpiteMark in plugin and cus
 - Default: 'background_sprite'
 
 
+#### retina
+
+Whether add retina image, this option accept retina image path, if you don't set retina image path,
+We will search for an image file with x2 in the same folder as the image of retina. For example /images/test.png@sprite&retina we will go to find /images/testx2.png.
+
+- Type: `string`
+- Default: 'background_sprite'
+
+
