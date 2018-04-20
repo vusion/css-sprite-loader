@@ -21,6 +21,7 @@ class ImageSpritePlugin {
             queryParam: 'sprite',
             defaultName: 'background_sprite',
             filter: 'query',
+            publicPath: undefined,
         }, options);
     }
     apply(compiler) {
@@ -38,6 +39,7 @@ class ImageSpritePlugin {
 
             compiler.plugin('this-compilation', (compilation, params) => {
                 compilation.plugin('optimize-tree', (chunks, modules, callback) => this.optimizeTree(callback, compilation));
+                compilation.plugin('optimize-extracted-chunks', (chunks) => this.optimizeExtractedChunks(chunks));
                 compilation.plugin('after-optimize-tree', (modules) => this.afterOptimizeTree(compilation));
             });
 
@@ -61,7 +63,12 @@ class ImageSpritePlugin {
         for (const target of Object.keys(imageList)) {
             const paths = imageList[target].path;
             const path2img = imageList[target].path2img;
-            const imageUrl = url.resolve(compilation.options.output.publicPath || '', target + '.png');
+            const targetFile = target + '.png';
+            let imageUrl = '/';
+            if (this.options.publicPath)
+                imageUrl = utils.urlResolve(this.options.publicPath, targetFile);
+            else
+                imageUrl = utils.urlResolve(compilation.options.output.publicPath || '', path.join(this.options.output, targetFile));
             const promiseInstance = new Promise((res, rej) => {
                 Spritesmith.run({
                     src: paths,
@@ -96,6 +103,26 @@ class ImageSpritePlugin {
             callback();
         });
     }
+    optimizeExtractedChunks(chunks) {
+        const fontCodePoints = this.fontCodePoints;
+        const images = {};
+        const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
+        for (const path of Object.keys(this.images)) {
+            const image = this.images[path];
+            images[image.name] = image;
+        }
+        chunks.forEach((chunk) => {
+            const modules = !chunk.mapModules ? chunk._modules : chunk.mapModules();
+            modules.filter((module) => '_originalModule' in module).forEach((module) => {
+                const source = module._source;
+                if (typeof source === 'string') {
+                    module._source = this.replaceHolder(module._source, replaceReg, images);
+                } else if (typeof source === 'object' && typeof source._value === 'string') {
+                    source._value = this.replaceHolder(source._value, replaceReg, images);
+                }
+            });
+        });
+    }
     afterOptimizeTree(compilation) {
         const allModules = getAllModules(compilation);
         const images = {};
@@ -123,11 +150,13 @@ class ImageSpritePlugin {
         const { x, y, hash } = message;
         const { width, height } = properties;
         if (isRetina) {
+            const imageWidth = message.width;
+            const imageHeight = message.height;
             const baseWidth = baseImage.size.width;
             const baseHeight = baseImage.size.height;
-            const proportionWidth = baseWidth / width;
-            const proportionHeight = baseHeight / height;
-            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x * proportionHeight}px -${y * proportionHeight}px;background-size:${width * proportionWidth}px ${height * proportionHeight}px;`;
+            const proportionWidth = baseWidth / imageWidth;
+            const proportionHeight = baseHeight / imageWidth;
+            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px;`;
         } else
             return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px`;
     }

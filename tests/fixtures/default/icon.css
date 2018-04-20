@@ -1,9 +1,26 @@
-.icon-arrow-left:before {
-    icon-font: url('../../icons/arrow-left.svg');
-    color: red;
+body .icon{
+    background: url('../../icons/compare.png?sprite=test');
 }
-
-.icon-arrow-up:before {
-    icon-font: url('../../icons/arrow-up.svg');
-    color: blue;
+.icon-1{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/compress.png?sprite=test');
+}
+.icon-2{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/diff.png?sprite');
+}
+.icon-3{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/schema.png?sprite');
+}
+.icon-4{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/rank.png?sprite=test');
+}
+.test{
+    color: red;
 }

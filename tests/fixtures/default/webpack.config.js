@@ -1,4 +1,4 @@
-const IconFontPlugin = require('../../../index').Plugin;
+const CssSpritePlugin = require('../../../index').Plugin;
 
 module.exports = {
     entry: {
@@ -12,5 +12,5 @@ module.exports = {
     module: {
         rules: [{ test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../../../index')] }],
     },
-    plugins: [new IconFontPlugin()],
+    plugins: [new CssSpritePlugin()],
 };
