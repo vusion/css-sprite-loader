@@ -1,7 +1,6 @@
 'use strict';
 
 const css = require('postcss');
-const path = require('path');
 const BG_URL_REG = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)/i;
 const fs = require('fs');
 const plugin = require('./Plugin');
@@ -13,10 +12,7 @@ const sizeOf = require('image-size');
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
-    const previousRequest = loader.previousRequest;
-    const loaderContexts = loaders.map((loader) => {
-        return loader.normalExecuted;
-    });
+    const loaderContexts = loaders.map((loader) => loader.normalExecuted);
     const index = loaderContexts.lastIndexOf(false);
     const nextLoader = loaders[index].normal;
     return nextLoader;
@@ -24,26 +20,13 @@ function getNextLoader(loader) {
 
 function getRetinaPath(path) {
     const paths = path.split('/');
-    const lastPath = paths[paths.length-1];
+    const lastPath = paths[paths.length - 1];
     const fileNames = lastPath.split('.');
     let fileName = fileNames[0];
-    fileName = fileName+"x2";
+    fileName = fileName + '@2x';
     fileNames[0] = fileName;
-    paths[paths.length-1] = fileNames.join('.');
+    paths[paths.length - 1] = fileNames.join('.');
     return paths.join('/');
-}
-
-function getRetinaImage(image, name) {
-    const retina = image.retina;
-    if (retina){
-        const retinaImage = JSON.parse(JSON.stringify(image));
-        delete retinaImage.retina;
-        retinaImage.path = retina;
-        retinaImage.path = retina;
-        retinaImage[name] = image[name] + '_@2x';
-        return retinaImage;
-    } else
-        return undefined;
 }
 
 function analysisBackground(urlStr, basePath) {
@@ -75,7 +58,7 @@ function analysisBackground(urlStr, basePath) {
                     needMerge = true;
                 else if (filter instanceof RegExp)
                     needMerge = filter.test(url);
-                if(param[0]==='retina'&&!param[1])
+                if (param[0] === 'retina' && !param[1])
                     param[1] = getRetinaPath(file);
                 result[param[0]] = param[1];
             });
@@ -104,23 +87,21 @@ function addImageToList(image, imageList, declaration) {
         const name = 'REPLACE_BACKGROUND(' + hash + ')';
         image.name = name;
         declaration.value = name;
-        if(image.retina) {
+        if (image.retina) {
             return {
                 selector: declaration.parent.selector,
                 retinaPath: image.retina,
                 image,
-            }
+            };
         }
-    };
+    }
     return undefined;
 }
-
 
 function ImageSpriteLoader(source) {
     const ImageSpritePlugin = this.ImageSpritePlugin;
     const ast = typeof source === 'string' ? css.parse(source) : source;
     const imageList = ImageSpritePlugin.images;
-    const rules = Array.from(ast.nodes);
     const callback = this.async();
     const promises = [];
     const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
@@ -147,34 +128,31 @@ function ImageSpriteLoader(source) {
             // 第二遍replace真正替换
             callback(null, acceptPostCssAst ? ast : cssStr);
         }
-        results = results.filter((result) => {
-            return !!result;
-        })
+        results = results.filter((result) => !!result);
         const retinaPromises = [];
-        if (results.length>0) {
+        if (results.length > 0) {
             // if have retina image add @media rule in ast end;
             ast.append('@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 192dpi){}');
-            const mediaNode = ast.nodes[ast.nodes.length-1];
+            const mediaNode = ast.nodes[ast.nodes.length - 1];
             results.forEach((result) => {
-                const { selector, retinaPath ,image } = result;
+                const { selector, retinaPath, image } = result;
                 mediaNode.append(`${selector}{background:url(${retinaPath}?${queryParam}=${image[queryParam]}_@2x&baseTarget=${image.path})}`);
             });
             mediaNode.walkDecls('background', (declaration) => {
                 retinaPromises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
-                    const retina = addImageToList(image, imageList, declaration);
+                    addImageToList(image, imageList, declaration);
                     image.isRetina = true;
                     // return retinaImages;
                 }));
             });
         }
-        if (retinaPromises.length===0){
+        if (retinaPromises.length === 0) {
             finish();
-        }else {
+        } else {
             Promise.all(retinaPromises).then(() => {
                 finish();
-            })
+            });
         }
-       
     }).catch((err) => {
         callback(err, source);
     });
