@@ -1,0 +1,75 @@
+/* body .icon{
+    background: url('../../icons/retina/avatar01.png?sprite=test&retina');
+} */
+/* .icon-1{
+    height: 89px;
+    width: 89px;
+    background: url('../../icons/retina/avatar01.png?sprite=test&retina');
+}
+.icon-2{
+    height: 89px;
+    width: 89px;
+    background: url('../../icons/retina/avatar02.png?sprite&&retina');
+} */
+.icon-1{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/compare.png');
+    background-size: 100px 100px;
+}
+.icon-2{
+    height: 80px;
+    width: 80px;
+    background: url('../../icons/compare.png');
+    background-size: 80px 80px;
+}
+.icon-3{
+    height: 40px;
+    width: 40px;
+    background: url('../../icons/compare.png');
+    background-size: 40px 40px;
+}
+.icon-4{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/compare.png?sprite');
+    background-size: 100px 100px;
+}
+.icon-5{
+    height: 80px;
+    width: 80px;
+    background: url('../../icons/compare.png?sprite');
+    background-size: 80px 80px;
+}
+.icon-6{
+    height: 40px;
+    width: 40px;
+    background: url('../../icons/compare.png?sprite');
+    background-size: 40px 40px;
+}
+.icon-7{
+    height: 40px;
+    width: 40px;
+    background: url('../../icons/retina/avatar03.png?sprite=test');
+    background-size: 40px 40px;
+}
+/* .icon-4{
+    height: 89px;
+    width: 89px;
+    background: url('../../icons/retina/avatar03.png?sprite=test');
+}
+.icon-5{
+    height: 89px;
+    width: 89px;
+    background: url('../../icons/retina/avatar04.png?sprite=test&retina');
+}
+.icon-6{
+    height: 89px;
+    width: 89px;
+    background: url('../../icons/retina/avatar05.png?sprite=test&retina');
+}
+.icon-7{
+    height: 89px;
+    width: 89px;
+    background: url('../../icons/retina/avatar05.png?sprite=test');
+} */

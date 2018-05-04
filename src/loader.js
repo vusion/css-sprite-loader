@@ -76,6 +76,7 @@ function addImageToList(image, imageList, declaration) {
         const path = image.path;
         let hash;
         if (imageList[path]) {
+            image = imageList[path];
             hash = imageList[path].hash;
         } else {
             const filesContent = fs.readFileSync(path);
@@ -94,8 +95,35 @@ function addImageToList(image, imageList, declaration) {
                 image,
             };
         }
+        return {
+            image,
+        };
     }
     return undefined;
+}
+
+function getImageBackgroundSize(declaration, image) {
+    const parent = declaration.parent;
+    parent.walkDecls('background-size', (declaration) => {
+        const size = declaration.value.split(' ');
+        let width, height;
+        if (size.length === 0)
+            return;
+        else if (size.length === 1) {
+            width = parseFloat(size[0]);
+            height = parseFloat(size[1]);
+        } else {
+            width = parseFloat(size[0]);
+            height = parseFloat(size[1]);
+        }
+        const name = `REPLACE_BACKGROUND_SIZE(${image.hash}_${width}_${height})`;
+        declaration.value = name;
+        if (!image.backgroundSize)
+            image.backgroundSize = {};
+        image.backgroundSize[name] = {
+            width, height,
+        };
+    });
 }
 
 function ImageSpriteLoader(source) {
@@ -112,8 +140,10 @@ function ImageSpriteLoader(source) {
 
     ast.walkDecls('background', (declaration) => {
         promises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
-            const retina = addImageToList(image, imageList, declaration);
-            return retina;
+            const imageObject = addImageToList(image, imageList, declaration);
+            if (image.merge)
+                getImageBackgroundSize(declaration, imageObject.image);
+            return imageObject;
         }));
     });
     // ruleWaker(ast);
@@ -128,7 +158,7 @@ function ImageSpriteLoader(source) {
             // 第二遍replace真正替换
             callback(null, acceptPostCssAst ? ast : cssStr);
         }
-        results = results.filter((result) => !!result);
+        results = results.filter((result) => !!result && !!result.retinaPath);
         const retinaPromises = [];
         if (results.length > 0) {
             // if have retina image add @media rule in ast end;
