@@ -16,7 +16,7 @@ module.exports = {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader', require.resolve('../../../index.js')],
             },
-            { test: /\.png$/, use: [{
+            { test: /\.png$/, use: ['file-loader', {
                 loader: 'url-loader',
                 options: {
                     limit: 1,

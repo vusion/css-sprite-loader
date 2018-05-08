@@ -1,17 +1,10 @@
 'use strict';
 
 const path = require('path');
-const url = require('url');
-const fs = require('fs');
-const shell = require('shelljs');
-const webpack = require('webpack');
 const Spritesmith = require('spritesmith');
-const Source = require('webpack-sources');
 const utils = require('./utils');
 const PADDING = 20;
-const ReplaceSource = require('webpack-sources').ReplaceSource;
 const getAllModules = require('./getAllModules');
-const replaceReg = /(REPLACE_BACKGROUND\([^)]*\))|(REPLACE_BACKGROUND_SIZE\([^)]*\))/g;
 const NAMESPACE = 'CssSpritePlugin';
 
 class ImageSpritePlugin {
@@ -91,7 +84,7 @@ class ImageSpritePlugin {
                         baseImage = images[baseTarget];
                     image.message = coordinates[path];
                     image.message.hash = utils.md5Create(result.image);
-                    image.replaceCss = this.createCss(imageUrl, image, result.properties, baseImage);
+                    image.replaceCss = this.createCss(imageUrl, image.message, result.properties, image.isRetina, baseImage);
                 }
                 assets[path.join(this.options.output, target + '.png')] = {
                     source: () => result.image,
@@ -105,8 +98,12 @@ class ImageSpritePlugin {
         });
     }
     optimizeExtractedChunks(chunks) {
-        const fontCodePoints = this.fontCodePoints;
-        const images = this.getReplaceData();
+        const images = {};
+        const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
+        for (const path of Object.keys(this.images)) {
+            const image = this.images[path];
+            images[image.name] = image;
+        }
         chunks.forEach((chunk) => {
             const modules = !chunk.mapModules ? chunk._modules : chunk.mapModules();
             modules.filter((module) => '_originalModule' in module).forEach((module) => {
@@ -121,7 +118,12 @@ class ImageSpritePlugin {
     }
     afterOptimizeTree(compilation) {
         const allModules = getAllModules(compilation);
-        const images = this.getReplaceData();
+        const images = {};
+        const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
+        for (const path of Object.keys(this.images)) {
+            const image = this.images[path];
+            images[image.name] = image;
+        }
         allModules.forEach((module) => {
             const source = module._source;
             if (typeof source === 'string') {
@@ -135,64 +137,21 @@ class ImageSpritePlugin {
         loaderContext.ImageSpritePlugin = this;
     }
     replaceHolder(value, replaceReg, images) {
-        return value.replace(replaceReg, (name, $1, $2) => {
-            if ($1)
-                return images[$1] || name;
-            else if ($2)
-                return images[$2] || name;
-            else
-                return name;
-        });
+        return value.replace(replaceReg, (name) => images[name] ? images[name].replaceCss : name);
     }
-    createCss(imageUrl, image, properties, baseImage) {
-        const message = image.message;
-        const isRetina = image.isRetina;
-        const backgroundSize = isRetina ? baseImage.backgroundSize : image.backgroundSize;
+    createCss(imageUrl, message, properties, isRetina, baseImage) {
         const { x, y, hash } = message;
         const { width, height } = properties;
-        const imageWidth = message.width;
-        const imageHeight = message.height;
-        const sizeAndPosition = {};
-        let body = `url(${imageUrl}?${hash}) no-repeat;`;
-        for (const name of Object.keys(backgroundSize)) {
-            const sizeMessage = backgroundSize[name];
-            const setWidth = sizeMessage.width;
-            const setHeight = sizeMessage.height;
-            let proportionWidth = setWidth / imageWidth;
-            let proportionHeight = setHeight / imageWidth;
-            if (isRetina) {
-                const baseWidth = baseImage.size.width;
-                const baseHeight = baseImage.size.height;
-                proportionWidth = (baseWidth / imageWidth) * (setWidth / baseWidth);
-                proportionHeight = (baseHeight / imageHeight) * (setHeight / baseHeight);
-            }
-            sizeAndPosition[name] = `${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;`;
-        }
-        if (isRetina && Object.keys(sizeAndPosition).length === 0) {
+        if (isRetina) {
+            const imageWidth = message.width;
+            const imageHeight = message.height;
             const baseWidth = baseImage.size.width;
             const baseHeight = baseImage.size.height;
-            const proportionWidth = (baseWidth / imageWidth);
-            const proportionHeight = (baseHeight / imageHeight);
-            body = body + `background-size: ${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;`;
-        }
-        return {
-            body,
-            sizeAndPosition,
-        };
-    }
-    getReplaceData() {
-        const data = {};
-        for (const path of Object.keys(this.images)) {
-            const image = this.images[path];
-            const replaceCss = image.replaceCss;
-            const body = replaceCss.body;
-            const size = replaceCss.sizeAndPosition;
-            data[image.name] = body;
-            for (const name of Object.keys(size)) {
-                data[name] = size[name];
-            }
-        }
-        return data;
+            const proportionWidth = baseWidth / imageWidth;
+            const proportionHeight = baseHeight / imageHeight;
+            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px;`;
+        } else
+            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px`;
     }
 }
 
