@@ -5,7 +5,9 @@ const Spritesmith = require('spritesmith');
 const utils = require('./utils');
 const PADDING = 20;
 const getAllModules = require('./getAllModules');
+const ReplaceSource = require('webpack-sources').ReplaceSource;
 const NAMESPACE = 'CssSpritePlugin';
+const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
 
 class ImageSpritePlugin {
     constructor(options) {
@@ -23,7 +25,9 @@ class ImageSpritePlugin {
             compiler.hooks.afterPlugins.tap(NAMESPACE, (compiler) => this.afterPlugins());
             compiler.hooks.thisCompilation.tap(NAMESPACE, (compilation, params) => {
                 compilation.hooks.optimizeTree.tapAsync(NAMESPACE, (chunks, modules, callback) => this.optimizeTree(callback, compilation));
+                compilation.hooks.optimizeExtractedChunks.tap(NAMESPACE, (chunks) => this.optimizeExtractedChunks(chunks));
                 compilation.hooks.afterOptimizeTree.tap(NAMESPACE, (modules) => this.afterOptimizeTree(compilation));
+                compilation.hooks.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.optimizeChunkAssets(chunks, callback, compilation));
             });
             compiler.hooks.compilation.tap(NAMESPACE, (compilation, params) => {
                 compilation.hooks.normalModuleLoader.tap(NAMESPACE, (loaderContext) => this.normalModuleLoader(loaderContext));
@@ -35,6 +39,7 @@ class ImageSpritePlugin {
                 compilation.plugin('optimize-tree', (chunks, modules, callback) => this.optimizeTree(callback, compilation));
                 compilation.plugin('optimize-extracted-chunks', (chunks) => this.optimizeExtractedChunks(chunks));
                 compilation.plugin('after-optimize-tree', (modules) => this.afterOptimizeTree(compilation));
+                compilation.plugin('optimize-chunk-assets', (chunks, callback) => this.optimizeChunkAssets(chunks, callback, compilation));
             });
 
             compiler.plugin('compilation', (compilation, params) => {
@@ -99,7 +104,6 @@ class ImageSpritePlugin {
     }
     optimizeExtractedChunks(chunks) {
         const images = {};
-        const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
         for (const path of Object.keys(this.images)) {
             const image = this.images[path];
             images[image.name] = image;
@@ -116,10 +120,30 @@ class ImageSpritePlugin {
             });
         });
     }
+    optimizeChunkAssets(chunks, callback, compilation) {
+        const images = {};
+        for (const path of Object.keys(this.images)) {
+            const image = this.images[path];
+            images[image.name] = image;
+        }
+        chunks.forEach((chunk) => {
+            chunk.files.forEach((file) => {
+                if (file.endsWith('.css')) {
+                    // 处理css模块
+                    const source = compilation.assets[file];
+                    let content = compilation.assets[file].source();
+                    content = this.replaceHolder(content, replaceReg, images);
+                    const replaceSource = new ReplaceSource(source);
+                    replaceSource.replace(0, source.size(), content);
+                    compilation.assets[file] = replaceSource;
+                }
+            });
+        });
+        callback();
+    }
     afterOptimizeTree(compilation) {
         const allModules = getAllModules(compilation);
         const images = {};
-        const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
         for (const path of Object.keys(this.images)) {
             const image = this.images[path];
             images[image.name] = image;
@@ -137,7 +161,7 @@ class ImageSpritePlugin {
         loaderContext.ImageSpritePlugin = this;
     }
     replaceHolder(value, replaceReg, images) {
-        return value.replace(replaceReg, (name) => images[name] ? images[name].replaceCss : name);
+        return value.replace(replaceReg, (name) => images[name] ? images[name].replaceCss || name : name);
     }
     createCss(imageUrl, message, properties, isRetina, baseImage) {
         const { x, y, hash } = message;
