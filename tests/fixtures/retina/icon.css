@@ -4,7 +4,7 @@ body .icon{
 .icon-1{
     height: 89px;
     width: 89px;
-    background: url('../../icons/retina/avatar01.png?sprite=test&retina');
+    background: url('../../icons/retina/avatar01.png?sprite=test&retina&retina3x&retina4x');
 }
 .icon-2{
     height: 89px;

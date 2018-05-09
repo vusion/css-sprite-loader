@@ -9,6 +9,7 @@ let defaultName = 'background_sprite';
 let filter = 'query';
 const utils = require('./utils');
 const sizeOf = require('image-size');
+const retinaMark = 'retina';
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
@@ -18,15 +19,26 @@ function getNextLoader(loader) {
     return nextLoader;
 }
 
-function getRetinaPath(path) {
+function getRetinaPath(path, name) {
+    const retinaNumber = getRetinaNumber(name);
     const paths = path.split('/');
     const lastPath = paths[paths.length - 1];
     const fileNames = lastPath.split('.');
     let fileName = fileNames[0];
-    fileName = fileName + '@2x';
+    fileName = `${fileName}@${retinaNumber}x`;
     fileNames[0] = fileName;
     paths[paths.length - 1] = fileNames.join('.');
     return paths.join('/');
+}
+
+function isRetinaMark(name) {
+    // if options' name start with 'retina'
+    return name.substr(0, retinaMark.length) === retinaMark;
+}
+function getRetinaNumber(name) {
+    if (name === retinaMark)
+        return 2;
+    return parseInt(name.substring(retinaMark.length, name.length - 1));
 }
 
 function analysisBackground(urlStr, basePath) {
@@ -47,6 +59,7 @@ function analysisBackground(urlStr, basePath) {
     }).then((file) => {
         this.addDependency(file);
         result.path = file;
+        result.retinas = [];
         if (params) {
             const paramsAst = params.split('&');
             paramsAst.forEach((item) => {
@@ -58,8 +71,11 @@ function analysisBackground(urlStr, basePath) {
                     needMerge = true;
                 else if (filter instanceof RegExp)
                     needMerge = filter.test(url);
-                if (param[0] === 'retina' && !param[1])
-                    param[1] = getRetinaPath(file);
+                if (isRetinaMark(param[0])) {
+                    result.retinas.push(param[0]);
+                    if (!param[1])
+                        param[1] = getRetinaPath(file, param[0]);
+                }
                 result[param[0]] = param[1];
             });
             const spriteMerge = result[queryParam];
@@ -87,10 +103,10 @@ function addImageToList(image, imageList, declaration) {
         const name = 'REPLACE_BACKGROUND(' + hash + ')';
         image.name = name;
         declaration.value = name;
-        if (image.retina) {
+        if (image.retinas.length > 0) {
             return {
                 selector: declaration.parent.selector,
-                retinaPath: image.retina,
+                retinaNames: image.retinas,
                 image,
             };
         }
@@ -129,22 +145,34 @@ function ImageSpriteLoader(source) {
             callback(null, acceptPostCssAst ? ast : cssStr);
         }
         results = results.filter((result) => !!result);
+        const mediaNodes = {};
         const retinaPromises = [];
         if (results.length > 0) {
             // if have retina image add @media rule in ast end;
-            ast.append('@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 192dpi){}');
-            const mediaNode = ast.nodes[ast.nodes.length - 1];
             results.forEach((result) => {
-                const { selector, retinaPath, image } = result;
-                mediaNode.append(`${selector}{background:url(${retinaPath}?${queryParam}=${image[queryParam]}_@2x&baseTarget=${image.path})}`);
+                const retinaNames = result.retinaNames;
+                const { selector, image } = result;
+                for (const name of retinaNames) {
+                    const retinaNumber = getRetinaNumber(name);
+                    const retinaPath = image[name];
+                    let mediaNode = mediaNodes[retinaNumber];
+                    if (!mediaNode) {
+                        ast.append(`@media (-webkit-min-device-pixel-ratio: ${retinaNumber}),(min-resolution: ${retinaNumber}dppx){}`);
+                        mediaNode = ast.nodes[ast.nodes.length - 1];
+                        mediaNodes[retinaNumber] = mediaNode;
+                    }
+                    mediaNode.append(`${selector}{background:url(${retinaPath}?${queryParam}=${image[queryParam]}_@${retinaNumber}x&baseTarget=${image.path})}`);
+                }
             });
-            mediaNode.walkDecls('background', (declaration) => {
-                retinaPromises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
-                    addImageToList(image, imageList, declaration);
-                    image.isRetina = true;
-                    // return retinaImages;
-                }));
-            });
+            for (const mediaName of Object.keys(mediaNodes)) {
+                const mediaNode = mediaNodes[mediaName];
+                mediaNode.walkDecls('background', (declaration) => {
+                    retinaPromises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
+                        addImageToList(image, imageList, declaration);
+                        image.isRetina = true;
+                    }));
+                });
+            }
         }
         if (retinaPromises.length === 0) {
             finish();
