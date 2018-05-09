@@ -3,6 +3,7 @@
 const path = require('path');
 const Spritesmith = require('spritesmith');
 const utils = require('./utils');
+const postcss = require('postcss');
 const PADDING = 20;
 const getAllModules = require('./getAllModules');
 const ReplaceSource = require('webpack-sources').ReplaceSource;
@@ -17,6 +18,7 @@ class ImageSpritePlugin {
             queryParam: 'sprite',
             defaultName: 'background_sprite',
             filter: 'query',
+            plugins: [],
             publicPath: undefined,
         }, options);
     }
@@ -81,6 +83,7 @@ class ImageSpritePlugin {
             }).then((result) => {
                 const coordinates = result.coordinates;
                 const assets = compilation.assets;
+                const imagePromises = [];
                 for (const path of Object.keys(coordinates)) {
                     const image = path2img[path];
                     const baseTarget = image.baseTarget;
@@ -89,12 +92,15 @@ class ImageSpritePlugin {
                         baseImage = images[baseTarget];
                     image.message = coordinates[path];
                     image.message.hash = utils.md5Create(result.image);
-                    image.replaceCss = this.createCss(imageUrl, image.message, result.properties, image.isRetina, baseImage);
+                    imagePromises.push(this.createCss(imageUrl, image.message, result.properties, image.isRetina, baseImage).then((css) => {
+                        image.replaceCss = css;
+                    }));
                 }
                 assets[path.join(this.options.output, target + '.png')] = {
                     source: () => result.image,
                     size: () => result.image.length,
                 };
+                return Promise.all(imagePromises);
             }).catch((err) => err);
             task.push(promiseInstance);
         }
@@ -166,6 +172,7 @@ class ImageSpritePlugin {
     createCss(imageUrl, message, properties, isRetina, baseImage) {
         const { x, y, hash } = message;
         const { width, height } = properties;
+        let result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;}`;
         if (isRetina) {
             const imageWidth = message.width;
             const imageHeight = message.height;
@@ -173,9 +180,28 @@ class ImageSpritePlugin {
             const baseHeight = baseImage.size.height;
             const proportionWidth = baseWidth / imageWidth;
             const proportionHeight = baseHeight / imageHeight;
-            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px;`;
+            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px; }`;
         } else
-            return `url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px`;
+            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px;background-size:${width}px ${height}px; }`;
+        return new Promise((res, rej) => {
+            postcss(this.options.plugins).process(result).then((result) => {
+                const root = result.root;
+                const background = {};
+                root.walkRules((rule) => {
+                    if (rule.selector === '.root') {
+                        rule.walkDecls(/^background/, (decl) => {
+                            background[decl.prop] = decl.value;
+                        });
+                    }
+                });
+                let resultStr = background.background + ';';
+                delete background.background;
+                for (const name of Object.keys(background)) {
+                    resultStr += `${name}:${background[name]};`;
+                }
+                res(resultStr);
+            });
+        });
     }
 }
 
