@@ -80,6 +80,16 @@ default sprite png name
 - Type: `String`
 - Default: `background_sprite`
 
+
+#### plugins
+
+postcss plugin list
+
+- Type: `Array`
+- Default: `[]`
+
+this plugins allow user to use postcss plugin to deal with css we generate, for example you can use `require('postcss-px-to-viewport')` and image sprite can be used in mobile;
+
 ### background image url options 
 
 #### sprite
@@ -93,7 +103,7 @@ Whether add this image to sprite image, you can set srpiteMark in plugin and cus
 #### retina
 
 Whether add retina image, this option accept retina image path, if you don't set retina image path,
-We will search for an image file with x2 in the same folder as the image of retina. For example /images/test.png@sprite&retina we will go to find /images/testx2.png.
+We will search for an image file with @2x in the same folder as the image of retina. For example /images/test.png@sprite&retina we will go to find /images/test@2x.png. you can also use retina3x or retina4x, we will adaptation screen with 3dppx or 4dppx
 
 - Type: `string`
 - Default: 'background_sprite'

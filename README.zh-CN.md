@@ -82,6 +82,15 @@ module.exports = {
 - Type: `String`
 - Default: `background_sprite`
 
+#### plugins
+
+postcss的插件列表
+
+- Type: `Array`
+- Default: `[]`
+
+这个参数允许用户传入一个postcss的plugins去处理我们生成的background样式，举个例子，使用`require('postcss-px-to-viewport')`，我们就能够在移动端使用我们的雪碧图
+
 ### background后缀传参
 
 #### sprite
@@ -91,4 +100,9 @@ module.exports = {
 - Type: `string`
 - Default: 'background_sprite'
 
+#### retina
+是否添加雪碧图，这个参数接受一个雪碧图的路径，如果你没有设置路径我们将会从当前图片相同目录下查找带有@2x后缀的图片。实际上你也可以是用retina3x 或者 retina4x的后缀，甚至更多这种格式的参数，我们将会一一适配。
+
+- Type: `string`
+- Default: 'background_sprite'
 
