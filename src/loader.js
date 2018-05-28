@@ -43,7 +43,7 @@ function getRetinaNumber(name) {
 
 function analysisBackground(urlStr, basePath) {
     const reg = BG_URL_REG.exec(urlStr);
-    if (!reg)
+    if (!reg || urlStr.includes('image-set'))
         return Promise.resolve({ merge: false });
     const url = reg[1];
     const parts = url.split('?');
