@@ -95,7 +95,7 @@ function addImageToList(image, imageList, declaration) {
             hash = imageList[path].hash;
         } else {
             const filesContent = fs.readFileSync(path);
-            hash = utils.md5Create(filesContent);
+            hash = 'image-' + utils.md5Create(filesContent);
             image.hash = hash;
             image.size = sizeOf(filesContent);
             imageList[path] = image;
@@ -161,7 +161,7 @@ function ImageSpriteLoader(source) {
                         mediaNode = ast.nodes[ast.nodes.length - 1];
                         mediaNodes[retinaNumber] = mediaNode;
                     }
-                    mediaNode.append(`${selector}{background:url(${retinaPath}?${queryParam}=${image[queryParam]}_@${retinaNumber}x&baseTarget=${image.path})}`);
+                    mediaNode.append(`${selector}{background:url(${retinaPath}?${queryParam}=${image[queryParam]}@${retinaNumber}x&baseTarget=${image.path})}`);
                 }
             });
             for (const mediaName of Object.keys(mediaNodes)) {
