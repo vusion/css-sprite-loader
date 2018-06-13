@@ -25,10 +25,12 @@ describe('Webpack Integration Tests', () => {
             const files = fs.readdirSync(path.resolve(__dirname, outputDirectory));
             expect(files).to.eql([
                 'background_sprite.png',
-                'background_sprite_@2x.png',
+                'background_sprite@2x.png',
                 'bundle.js',
                 'test.png',
-                'test_@2x.png',
+                'test@2x.png',
+                'test@3x.png',
+                'test@4x.png',
             ]);
             const filesContent = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/background_sprite.png'));
             const md5Code = utils.md5Create(filesContent);
@@ -36,10 +38,10 @@ describe('Webpack Integration Tests', () => {
             const filesContent2 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/test.png'));
             const md5Code2 = utils.md5Create(filesContent2);
             expect(md5Code2).to.eql('e1645b7464e7a59bbc9466b7f4f1562b');
-            const filesContent3 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/background_sprite_@2x.png'));
+            const filesContent3 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/background_sprite@2x.png'));
             const md5Code3 = utils.md5Create(filesContent);
             expect(md5Code3).to.eql('771775153233326edb09bcc9bbbf52ed');
-            const filesContent4 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/test_@2x.png'));
+            const filesContent4 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/test@2x.png'));
             const md5Code4 = utils.md5Create(filesContent2);
             expect(md5Code4).to.eql('e1645b7464e7a59bbc9466b7f4f1562b');
             const cssContent = fs.readFileSync(path.resolve(__dirname, outputDirectory+'/bundle.js')).toString();
