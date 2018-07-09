@@ -9,6 +9,8 @@ const getAllModules = require('./getAllModules');
 const ReplaceSource = require('webpack-sources').ReplaceSource;
 const NAMESPACE = 'CssSpritePlugin';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
+const ReplaceDependency = require('./replaceDependecy');
+const NullFactory = require('webpack/lib/NullFactory');
 
 class ImageSpritePlugin {
     constructor(options) {
@@ -38,6 +40,8 @@ class ImageSpritePlugin {
             compiler.plugin('after-plugins', (compiler) => this.afterPlugins());
 
             compiler.plugin('this-compilation', (compilation, params) => {
+                compilation.dependencyFactories.set(ReplaceDependency, new NullFactory());
+                compilation.dependencyTemplates.set(ReplaceDependency, ReplaceDependency.Template);
                 compilation.plugin('optimize-tree', (chunks, modules, callback) => this.optimizeTree(callback, compilation));
                 compilation.plugin('optimize-extracted-chunks', (chunks) => this.optimizeExtractedChunks(chunks));
                 compilation.plugin('after-optimize-tree', (modules) => this.afterOptimizeTree(compilation));
@@ -119,9 +123,9 @@ class ImageSpritePlugin {
             modules.filter((module) => '_originalModule' in module).forEach((module) => {
                 const source = module._source;
                 if (typeof source === 'string') {
-                    module._source = this.replaceHolder(module._source, replaceReg, images);
+                    module._source = this.replaceStringHolder(module._source, replaceReg, images);
                 } else if (typeof source === 'object' && typeof source._value === 'string') {
-                    source._value = this.replaceHolder(source._value, replaceReg, images);
+                    source._value = this.replaceStringHolder(source._value, replaceReg, images);
                 }
             });
         });
@@ -138,7 +142,7 @@ class ImageSpritePlugin {
                     // 处理css模块
                     const source = compilation.assets[file];
                     let content = compilation.assets[file].source();
-                    content = this.replaceHolder(content, replaceReg, images);
+                    content = this.replaceStringHolder(content, replaceReg, images);
                     const replaceSource = new ReplaceSource(source);
                     replaceSource.replace(0, source.size(), content);
                     compilation.assets[file] = replaceSource;
@@ -155,11 +159,20 @@ class ImageSpritePlugin {
             images[image.name] = image;
         }
         allModules.forEach((module) => {
+            const replaceDependency = module.dependencies.filter((dependency) => dependency.constructor === ReplaceDependency)[0];
             const source = module._source;
+            let range = [];
             if (typeof source === 'string') {
-                module._source = this.replaceHolder(module._source, replaceReg, images);
+                range = this.replaceHolder(module._source, replaceReg, images);
             } else if (typeof source === 'object' && typeof source._value === 'string') {
-                source._value = this.replaceHolder(source._value, replaceReg, images);
+                range = this.replaceHolder(source._value, replaceReg, images);
+            }
+            if (range.length > 0) {
+                if (replaceDependency) {
+                    replaceDependency.updateRange(range);
+                } else {
+                    module.addDependency(new ReplaceDependency(range));
+                }
             }
         });
     }
@@ -167,6 +180,23 @@ class ImageSpritePlugin {
         loaderContext.ImageSpritePlugin = this;
     }
     replaceHolder(value, replaceReg, images) {
+        const rangeList = [];
+        const haveChecked = [];
+        value.replace(replaceReg, ($1, $2) => {
+            if (images[$1] && haveChecked.indexOf($1) === -1) {
+                haveChecked.push($1);
+                const content = images[$1] ? images[$1].replaceCss || $1 : $1;
+                let index = value.indexOf($1);
+                while (index !== -1) {
+                    rangeList.push([index, index + $1.length, content]);
+                    index = value.indexOf($1, index + 1);
+                }
+            }
+            return $1;
+        });
+        return rangeList;
+    }
+    replaceStringHolder(value, replaceReg, images) {
         return value.replace(replaceReg, (name) => images[name] ? images[name].replaceCss || name : name);
     }
     createCss(imageUrl, message, properties, isRetina, baseImage) {
