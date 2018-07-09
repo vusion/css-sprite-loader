@@ -1,4 +1,6 @@
 body .icon{
+    height: 100px;
+    width: 100px;
     background: url('../../icons/compare.png?sprite=test');
 }
 .icon-1{
