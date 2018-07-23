@@ -9,6 +9,8 @@ const getAllModules = require('./getAllModules');
 const ReplaceSource = require('webpack-sources').ReplaceSource;
 const NAMESPACE = 'CssSpritePlugin';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
+const replaceBackgroundReg = /background-image/;
+const backGroundPositionReg = /background-position/;
 const ReplaceDependency = require('./replaceDependecy');
 const NullFactory = require('webpack/lib/NullFactory');
 
@@ -82,7 +84,9 @@ class ImageSpritePlugin {
                 }, (err, result) => {
                     if (err)
                         rej(err);
-                    res(result);
+                    else {
+                        res(result);
+                    }
                 });
             }).then((result) => {
                 const coordinates = result.coordinates;
@@ -96,6 +100,10 @@ class ImageSpritePlugin {
                         baseImage = images[baseTarget];
                     image.message = coordinates[path];
                     image.message.hash = utils.md5Create(result.image);
+                    if (image.position) {
+                        image.message.x = image.message.x - parseInt(image.position[0]);
+                        image.message.y = image.message.y - parseInt(image.position[1]);
+                    }
                     imagePromises.push(this.createCss(imageUrl, image.message, result.properties, image.isRetina, baseImage).then((css) => {
                         image.replaceCss = css;
                     }));
@@ -194,6 +202,14 @@ class ImageSpritePlugin {
             }
             return $1;
         });
+        value.replace(replaceBackgroundReg, ($1, $2) => {
+            let index = value.indexOf($1);
+            while (index !== -1) {
+                rangeList.push([index, index + $1.length, 'background:']);
+                index = value.indexOf($1, index + 1);
+            }
+            return $1;
+        });
         return rangeList;
     }
     replaceStringHolder(value, replaceReg, images) {
@@ -210,9 +226,9 @@ class ImageSpritePlugin {
             const baseHeight = baseImage.size.height;
             const proportionWidth = baseWidth / imageWidth;
             const proportionHeight = baseHeight / imageHeight;
-            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;background-position: -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px; }`;
+            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px; }`;
         } else
-            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;background-position: -${x}px -${y}px;background-size:${width}px ${height}px; }`;
+            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  ${(-x).toString()}px ${(-y).toString()}px;background-size:${width}px ${height}px; }`;
         return new Promise((res, rej) => {
             postcss(this.options.plugins).process(result).then((result) => {
                 const root = result.root;

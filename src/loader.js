@@ -10,6 +10,7 @@ let filter = 'query';
 const utils = require('./utils');
 const sizeOf = require('image-size');
 const retinaMark = 'retina';
+const backgroundReg = /background(-image)*/;
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
@@ -88,6 +89,10 @@ function analysisBackground(urlStr, basePath) {
 }
 
 function addImageToList(image, imageList, declaration) {
+    const positionArr = declaration.value.split(' ').slice(1, 3);
+    if (positionArr.length === 2) {
+        image.position = positionArr;
+    }
     if (image.merge) {
         const path = image.path;
         let hash;
@@ -125,14 +130,12 @@ function ImageSpriteLoader(source) {
     queryParam = ImageSpritePlugin.options.queryParam;
     defaultName = ImageSpritePlugin.options.defaultName;
     filter = ImageSpritePlugin.options.filter;
-
-    ast.walkDecls('background', (declaration) => {
+    ast.walkDecls(backgroundReg, (declaration) => {
         promises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
             const retina = addImageToList(image, imageList, declaration);
             return retina;
         }));
     });
-    // ruleWaker(ast);
     Promise.all(promises).then((results) => {
         function finish() {
             let cssStr = '';

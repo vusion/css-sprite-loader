@@ -1,11 +1,19 @@
 body .icon{
-    background: url('../../icons/compare.png?sprite=test');
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/compare.png?sprite=test') 10px 10px;
 }
 .icon-1{
     height: 100px;
     width: 100px;
-    background: url('../../icons/compress.png?sprite=test');
+    background: url('../../icons/compress.png?sprite=test') 5px 5px;
 }
+.icon-2{
+    height: 100px;
+    width: 100px;
+    background: url('../../icons/diff.png?sprite=test') 15px 15px;
+}
+/*
 .icon-2{
     height: 100px;
     width: 100px;
@@ -23,4 +31,4 @@ body .icon{
 }
 .test{
     color: red;
-}
+}*/
