@@ -25,7 +25,7 @@ function getRetinaPath(filePath, name) {
     const extname = path.extname(filePath);
     let baseName = path.basename(filePath, extname);
     const dirname = path.dirname(filePath);
-    baseName = `${baseName}@${retinaNumber}x.${extname}`;
+    baseName = `${baseName}@${retinaNumber}x${extname}`;
     return path.join(dirname, baseName);
 }
 
