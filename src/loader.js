@@ -4,6 +4,7 @@ const css = require('postcss');
 const BG_URL_REG = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)/i;
 const fs = require('fs');
 const plugin = require('./Plugin');
+const path = require('path');
 let queryParam = 'sprite';
 let defaultName = 'background_sprite';
 let filter = 'query';
@@ -20,16 +21,13 @@ function getNextLoader(loader) {
     return nextLoader;
 }
 
-function getRetinaPath(path, name) {
+function getRetinaPath(filePath, name) {
     const retinaNumber = getRetinaNumber(name);
-    const paths = path.split('/');
-    const lastPath = paths[paths.length - 1];
-    const fileNames = lastPath.split('.');
-    let fileName = fileNames[0];
-    fileName = `${fileName}@${retinaNumber}x`;
-    fileNames[0] = fileName;
-    paths[paths.length - 1] = fileNames.join('.');
-    return paths.join('/');
+    const extname = path.extname(filePath);
+    let baseName = path.basename(filePath, extname);
+    const dirname = path.dirname(filePath);
+    baseName = `${baseName}@${retinaNumber}x${extname}`;
+    return path.join(dirname, baseName);
 }
 
 function isRetinaMark(name) {

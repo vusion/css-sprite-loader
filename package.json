@@ -1,7 +1,7 @@
 {
   "name": "css-sprite-loader",
   "description": "A webpack loader to convert png into sprite image",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "moujintao <moujintaotest@163.com>",
   "contributors": [
     "Rainfore <rainforest92@126.com>"
