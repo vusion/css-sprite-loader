@@ -11,6 +11,7 @@ const NAMESPACE = 'CssSpritePlugin';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
 const replaceBackgroundReg = /background-image/;
 const backGroundPositionReg = /background-position/;
+const backGroundSizeReg = /background-size/;
 const ReplaceDependency = require('./replaceDependecy');
 const NullFactory = require('webpack/lib/NullFactory');
 
@@ -100,11 +101,7 @@ class ImageSpritePlugin {
                         baseImage = images[baseTarget];
                     image.message = coordinates[path];
                     image.message.hash = utils.md5Create(result.image);
-                    if (image.position) {
-                        image.message.x = image.message.x - parseInt(image.position[0]);
-                        image.message.y = image.message.y - parseInt(image.position[1]);
-                    }
-                    imagePromises.push(this.createCss(imageUrl, image.message, result.properties, image.isRetina, baseImage).then((css) => {
+                    imagePromises.push(this.createCss(imageUrl, image, result.properties, image.isRetina, baseImage).then((css) => {
                         image.replaceCss = css;
                     }));
                 }
@@ -210,25 +207,85 @@ class ImageSpritePlugin {
             }
             return $1;
         });
+        value.replace(backGroundPositionReg, ($1, $2) => {
+            let index = value.indexOf($1);
+            while (index !== -1) {
+                rangeList.push([index, index + $1.length, '']);
+                index = value.indexOf($1, index + 1);
+            }
+            return $1;
+        });
+        value.replace(backGroundSizeReg, ($1, $2) => {
+            let index = value.indexOf($1);
+            while (index !== -1) {
+                rangeList.push([index, index + $1.length, '']);
+                index = value.indexOf($1, index + 1);
+            }
+            return $1;
+        });
         return rangeList;
     }
     replaceStringHolder(value, replaceReg, images) {
         return value.replace(replaceReg, (name) => images[name] ? images[name].replaceCss || name : name);
     }
-    createCss(imageUrl, message, properties, isRetina, baseImage) {
-        const { x, y, hash } = message;
-        const { width, height } = properties;
+    createCss(imageUrl, image, properties, isRetina, baseImage) {
+        let { x, y, hash } = image.message;
+        let { width, height } = properties;
         let result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;}`;
         if (isRetina) {
-            const imageWidth = message.width;
-            const imageHeight = message.height;
+            const imageWidth = image.message.width;
+            const imageHeight = image.message.height;
             const baseWidth = baseImage.size.width;
             const baseHeight = baseImage.size.height;
             const proportionWidth = baseWidth / imageWidth;
             const proportionHeight = baseHeight / imageHeight;
             result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px; }`;
-        } else
+        } else {
+            let basicWidth = image.message.width;
+            let basicHeight = image.message.height;
+            let basicX = image.message.x;
+            let basicY = image.message.y;
+            let horizontalNum = 1;
+            let verticalNum = 1;
+            let itemRow = 0;
+            let itemCol = 0;
+            if (image.backgroundSize) {
+                do {
+                    basicWidth = image.message.width + PADDING;
+                    horizontalNum++;
+                } while (basicWidth === width);
+                do {
+                    basicHeight = image.message.height + PADDING;
+                    verticalNum++;
+                } while (basicHeight === height);
+                while (basicX > 0) {
+                    itemRow++;
+                    basicX = basicX - image.message.width - PADDING;
+                }
+                while (basicY > 0) {
+                    itemCol++;
+                    basicY = basicY - image.message.height - PADDING;
+                }
+                if (image.backgroundSize.length === 2) {
+                    width = horizontalNum * parseInt(image.backgroundSize[0]) + PADDING * (horizontalNum - 1);
+                    height = verticalNum * parseInt(image.backgroundSize[1]) + PADDING * (verticalNum - 1);
+                    x = itemRow * (parseInt(image.backgroundSize[0]) + PADDING);
+                    y = itemCol * (parseInt(image.backgroundSize[1]) + PADDING);
+                } else if (typeof image.backgroundSize === 'string') {
+                    if (image.divWidth && image.divHeight) {
+                        width = horizontalNum * parseInt(image.divWidth) + PADDING * (horizontalNum - 1);
+                        height = verticalNum * parseInt(image.divHeight) + PADDING * (verticalNum - 1);
+                        x = itemRow * (parseInt(image.divWidth) + PADDING);
+                        y = itemCol * (parseInt(image.divHeight) + PADDING);
+                    }
+                }
+            }
+            if (image.position) {
+                x = x - parseInt(image.position[0]);
+                y = y - parseInt(image.position[1]);
+            }
             result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  ${(-x).toString()}px ${(-y).toString()}px;background-size:${width}px ${height}px; }`;
+        }
         return new Promise((res, rej) => {
             postcss(this.options.plugins).process(result).then((result) => {
                 const root = result.root;

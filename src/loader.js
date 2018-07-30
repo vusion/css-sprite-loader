@@ -11,7 +11,7 @@ let filter = 'query';
 const utils = require('./utils');
 const sizeOf = require('image-size');
 const retinaMark = 'retina';
-const backgroundReg = /background(-image)*/;
+const backgroundReg = /^background/;
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
@@ -40,7 +40,7 @@ function getRetinaNumber(name) {
     return parseInt(name.substring(retinaMark.length, name.length - 1));
 }
 
-function analysisBackground(urlStr, basePath) {
+function analysisBackground(urlStr, basePath, parentNode) {
     const reg = BG_URL_REG.exec(urlStr);
     if (!reg || urlStr.includes('image-set'))
         return Promise.resolve({ merge: false });
@@ -86,11 +86,45 @@ function analysisBackground(urlStr, basePath) {
     });
 }
 
-function addImageToList(image, imageList, declaration) {
+function checkIfPositionAssigned(image, Node) {
+    Node.walkDecls('background-position', (declaration) => {
+        if (declaration) {
+            image.position = declaration.value.split(' ');
+        }
+    });
+}
+
+function checkIfBGsizeAssigned(image, Node) {
+    const ratioReg = /%$/;
+    Node.walkDecls('background-size', (declaration) => {
+        if (declaration) {
+            image.backgroundSize = ratioReg.test(declaration) ? declaration.value : declaration.value.split(' ');
+        }
+    });
+}
+
+function checkDivWidthHeight(image, Node) {
+    Node.walkDecls('width', (declaration) => {
+        if (declaration) {
+            image.divWidth = declaration.value;
+        }
+    });
+    Node.walkDecls('height', (declaration) => {
+        if (declaration) {
+            image.divHeight = declaration.value;
+        }
+    });
+}
+
+function addImageToList(image, imageList, declaration, parentNode) {
     const positionArr = declaration.value.split(' ').slice(1, 3);
     if (positionArr.length === 2) {
         image.position = positionArr;
     }
+    checkIfPositionAssigned(image, parentNode);
+    checkIfBGsizeAssigned(image, parentNode);
+    checkDivWidthHeight(image, parentNode);
+
     if (image.merge) {
         const path = image.path;
         let hash;
@@ -128,12 +162,22 @@ function ImageSpriteLoader(source) {
     queryParam = ImageSpritePlugin.options.queryParam;
     defaultName = ImageSpritePlugin.options.defaultName;
     filter = ImageSpritePlugin.options.filter;
-    ast.walkDecls(backgroundReg, (declaration) => {
+    ast.walkRules((rule) => {
+        rule.walk((node) => {
+            if (node.prop === 'background' || node.prop === 'background-image') {
+                promises.push(analysisBackground.call(this, node.value, this.context, rule).then((image) => {
+                    const retina = addImageToList(image, imageList, node, rule);
+                    return retina;
+                }));
+            }
+        });
+    });
+    /* ast.walkDecls(backgroundReg, (declaration) => {
         promises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
             const retina = addImageToList(image, imageList, declaration);
             return retina;
         }));
-    });
+    });*/
     Promise.all(promises).then((results) => {
         function finish() {
             let cssStr = '';

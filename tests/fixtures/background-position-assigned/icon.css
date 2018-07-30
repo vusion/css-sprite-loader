@@ -1,17 +1,21 @@
 body .icon{
-    height: 100px;
-    width: 100px;
-    background: url('../../icons/compare.png?sprite=test') 10px 10px;
+    height: 200px;
+    width: 200px;
+    background-image: url('../../icons/compare.png?sprite=test');
+    background-size: 100%;
+    background-position: 10px 10px;
 }
 .icon-1{
-    height: 100px;
+    height: 200px;
     width: 100px;
-    background: url('../../icons/compress.png?sprite=test') 5px 5px;
+    background: url('../../icons/compress.png?sprite=test');
+    background-size: 100%;
 }
 .icon-2{
-    height: 100px;
-    width: 100px;
-    background: url('../../icons/diff.png?sprite=test') 15px 15px;
+    height: 150px;
+    width: 150px;
+    background: url('../../icons/diff.png?sprite=test');
+    background-size: 150px 150px;
 }
 /*
 .icon-2{
