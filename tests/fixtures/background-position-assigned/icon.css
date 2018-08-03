@@ -12,27 +12,22 @@ body .icon{
     background-size: 100%;
 }
 .icon-2{
-    height: 150px;
-    width: 150px;
-    background: url('../../icons/diff.png?sprite=test');
-    background-size: 150px 150px;
-}
-/*
-.icon-2{
     height: 100px;
     width: 100px;
-    background: url('../../icons/diff.png?sprite');
+    background: url('../../icons/diff.png?sprite=test');
 }
 .icon-3{
-    height: 100px;
-    width: 100px;
-    background: url('../../icons/schema.png?sprite');
+    height: 120px;
+    width: 180px;
+    background: url('../../icons/rank.png?sprite');
+    background-size: 100%;
 }
 .icon-4{
     height: 100px;
     width: 100px;
-    background: url('../../icons/rank.png?sprite=test');
+    background: url('../../icons/schema.png?sprite');
+    background-size: 100%;
 }
 .test{
     color: red;
-}*/
+}

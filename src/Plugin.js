@@ -247,36 +247,36 @@ class ImageSpritePlugin {
             let basicY = image.message.y;
             let horizontalNum = 1;
             let verticalNum = 1;
-            let itemRow = 0;
-            let itemCol = 0;
+            let itemRow = 1;
+            let itemCol = 1;
+            while (basicWidth < width) {
+                basicWidth = basicWidth + image.message.width + PADDING;
+                horizontalNum++;
+            }
+            while (basicHeight < height) {
+                basicHeight = basicHeight + image.message.height + PADDING;
+                verticalNum++;
+            }
+            while (basicX > 0) {
+                itemRow++;
+                basicX = basicX - image.message.width - PADDING;
+            }
+            while (basicY > 0) {
+                itemCol++;
+                basicY = basicY - image.message.height - PADDING;
+            }
             if (image.backgroundSize) {
-                do {
-                    basicWidth = image.message.width + PADDING;
-                    horizontalNum++;
-                } while (basicWidth === width);
-                do {
-                    basicHeight = image.message.height + PADDING;
-                    verticalNum++;
-                } while (basicHeight === height);
-                while (basicX > 0) {
-                    itemRow++;
-                    basicX = basicX - image.message.width - PADDING;
-                }
-                while (basicY > 0) {
-                    itemCol++;
-                    basicY = basicY - image.message.height - PADDING;
-                }
                 if (image.backgroundSize.length === 2) {
                     width = horizontalNum * parseInt(image.backgroundSize[0]) + PADDING * (horizontalNum - 1);
                     height = verticalNum * parseInt(image.backgroundSize[1]) + PADDING * (verticalNum - 1);
-                    x = itemRow * (parseInt(image.backgroundSize[0]) + PADDING);
-                    y = itemCol * (parseInt(image.backgroundSize[1]) + PADDING);
+                    x = (itemRow - 1) * (parseInt(image.backgroundSize[0]) + PADDING);
+                    y = (itemCol - 1) * (parseInt(image.backgroundSize[1]) + PADDING);
                 } else if (typeof image.backgroundSize === 'string') {
                     if (image.divWidth && image.divHeight) {
                         width = horizontalNum * parseInt(image.divWidth) + PADDING * (horizontalNum - 1);
                         height = verticalNum * parseInt(image.divHeight) + PADDING * (verticalNum - 1);
-                        x = itemRow * (parseInt(image.divWidth) + PADDING);
-                        y = itemCol * (parseInt(image.divHeight) + PADDING);
+                        x = (itemRow - 1) * (parseInt(image.divWidth) + PADDING);
+                        y = (itemCol - 1) * (parseInt(image.divHeight) + PADDING);
                     }
                 }
             }
