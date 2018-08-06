@@ -19,13 +19,13 @@ body .icon{
 .icon-3{
     height: 120px;
     width: 180px;
-    background: url('../../icons/rank.png?sprite');
+    background: url('../../icons/rank.png?sprite=test');
     background-size: 100%;
 }
 .icon-4{
     height: 100px;
     width: 100px;
-    background: url('../../icons/schema.png?sprite');
+    background: url('../../icons/schema.png?sprite=test');
     background-size: 100%;
 }
 .test{

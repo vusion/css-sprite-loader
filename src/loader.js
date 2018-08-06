@@ -87,33 +87,39 @@ function analysisBackground(urlStr, basePath, parentNode) {
 }
 
 function checkIfPositionAssigned(image, Node) {
-    Node.walkDecls('background-position', (declaration) => {
-        if (declaration) {
-            image.position = declaration.value.split(' ');
-        }
-    });
+    if (Node) {
+        Node.walkDecls('background-position', (declaration) => {
+            if (declaration) {
+                image.position = declaration.value.split(' ');
+            }
+        });
+    }
 }
 
 function checkIfBGsizeAssigned(image, Node) {
     const ratioReg = /%$/;
-    Node.walkDecls('background-size', (declaration) => {
-        if (declaration) {
-            image.backgroundSize = ratioReg.test(declaration) ? declaration.value : declaration.value.split(' ');
-        }
-    });
+    if (Node) {
+        Node.walkDecls('background-size', (declaration) => {
+            if (declaration) {
+                image.backgroundSize = ratioReg.test(declaration) ? declaration.value : declaration.value.split(' ');
+            }
+        });
+    }
 }
 
 function checkDivWidthHeight(image, Node) {
-    Node.walkDecls('width', (declaration) => {
-        if (declaration) {
-            image.divWidth = declaration.value;
-        }
-    });
-    Node.walkDecls('height', (declaration) => {
-        if (declaration) {
-            image.divHeight = declaration.value;
-        }
-    });
+    if (Node) {
+        Node.walkDecls('width', (declaration) => {
+            if (declaration) {
+                image.divWidth = declaration.value;
+            }
+        });
+        Node.walkDecls('height', (declaration) => {
+            if (declaration) {
+                image.divHeight = declaration.value;
+            }
+        });
+    }
 }
 
 function addImageToList(image, imageList, declaration, parentNode) {
