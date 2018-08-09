@@ -1,21 +1,39 @@
 # css-sprite-loader
 
-this is a webpack loader  convert png into sprite png in CSS
+- [中文说明](README.zh-CN.md)
+
+Webpack loader for creating PNG sprites.
+
+[![CircleCI][circleci-img]][circleci-url]
+[![NPM Version][npm-img]][npm-url]
+[![Dependencies][david-img]][david-url]
+[![NPM Download][download-img]][download-url]
+
+[circleci-img]: https://img.shields.io/circleci/project/github/vusion/css-sprite-loader.svg?style=flat-square
+[circleci-url]: https://circleci.com/gh/vusion/css-sprite-loader
+[npm-img]: http://img.shields.io/npm/v/css-sprite-loader.svg?style=flat-square
+[npm-url]: http://npmjs.org/package/css-sprite-loader
+[david-img]: http://img.shields.io/david/vusion/css-sprite-loader.svg?style=flat-square
+[david-url]: https://david-dm.org/vusion/css-sprite-loader
+[download-img]: https://img.shields.io/npm/dm/css-sprite-loader.svg?style=flat-square
+[download-url]: https://npmjs.org/package/css-sprite-loader
 
 ## Example
-you need add sprite options after background image url
+
+Just add a `?sprite` query after background image url:
 
 ``` css
-.select {
+.foo {
     background: url('../icons/compare.png?sprite');
-    color: #666;
 }
 ```
-will generate corresponding css so web browsers can recognize.
+
+Then `css-sprite-loader` will generate a sprite image.
 
 ``` css
-.select {
-    background: url(/background_sprite.png?5d40e339682970eb14baf6110a83ddde) no-repeat;background-position: -100px -0px;
+.foo {
+    background: url(/sprite.png?5d40e339682970eb14baf6110a83ddde) no-repeat;
+    background-position: -100px -0px;
 }
 ```
 
@@ -25,27 +43,58 @@ will generate corresponding css so web browsers can recognize.
 npm install --save-dev css-sprite-loader
 ```
 
-## Features
+## Config
 
-You must import plugin below in webpack in addition to adding custom properties in CSS.
+You need add a loader and a plugin in Webpack config file.
 
-```javascript
-const CssSpritePlugin = require('css-sprite-loader').Plugin;
+``` javascript
+const CSSSpritePlugin = require('css-sprite-loader').Plugin;
 
 module.exports = {
     ...
     module: {
         rules: [{ test: /\.css$/, use: ['style-loader', 'css-loader', 'css-sprite-loader'] }],
     },
-    plugins: [new CssSpritePlugin()],
+    plugins: [new CSSSpritePlugin()],
 };
 ```
 
+### background url query
+
+#### sprite
+
+Whether add this image into sprite image and set which sprite image
+
+``` css
+.foo {
+    background: url('../icons/compare.png?sprite');
+}
+
+.bar {
+    background: url('../icons/message.png?sprite=sprite-nav');
+}
+```
+
+<!-- #### retina
+
+Whether add retina image, this option accept retina image path, if you don't set retina image path,
+We will search for an image file with @2x in the same folder as the image of retina. For example /images/test.png@sprite&retina we will go to find /images/test@2x.png. you can also use retina3x or retina4x, we will adaptation screen with 3dppx or 4dppx
+
+- Type: `string`
+- Default: 'background_sprite' -->
+
 ### loader options
 
-no
+None.
 
 ### plugin options
+
+#### defaultName
+
+- Type: `string`
+- Default: `'sprite'`
+
+Default file name of sprite output file.
 
 #### output
 
@@ -56,56 +105,50 @@ Path of sprite png to webpack output path. **Must be a relative path.**
 
 #### padding
 
-padding of sprite image
+- Type: `number`
+- Default: `'sprite'`
+
+The margin between small images in sprite.
 
 - Type: `Number`
 - Default: `20`
+
 #### filter
 
-this param define how to sprite png. you can set `query` `all` and a RegExp. when filter is`query`,we will sprite image have queryParam in url param.when filter is `all`, we will sprite all image is imported in css. and RegExp, we will test image url use this RegExp,and url without param.
+- Type: `string`
+- Default: `'all'`
 
-- Type: `String`
-- Default: `query`
+Options: `'all'`、`'query'`、`RegExp`
+
+How to filter image files for merging:
+- `'all'`: All imported images will be merged.
+- `'query'`: Only image path with `?sprite` query param will be merged.
+- `RegExp`: Only image path matched by RegExp
+
 #### queryParam
 
-customize Whether add this image to sprite image mark
+Customize key of query param in svg path. Only works when `filter: 'query'`
 
-- Type: `String`
-- Default: `sprite`
-
-#### defaultName
-
-default sprite png name
-
-- Type: `String`
-- Default: `background_sprite`
-
+- Type: `string`
+- Default: `'sprite'`
 
 #### plugins
 
-postcss plugin list
+Postcss plugin list
 
 - Type: `Array`
 - Default: `[]`
 
-this plugins allow user to use postcss plugin to deal with css we generate, for example you can use `require('postcss-px-to-viewport')` and image sprite can be used in mobile;
+These postcss plugins will be processed on related codes after creating sprite image. For example, you can use `require('postcss-px-to-viewport')` to convert units of background value.
 
-### background image url options 
+## Changelog
 
-#### sprite
+See [Releases](https://github.com/vusion/css-sprite-loader/releases)
 
-Whether add this image to sprite image, you can set srpiteMark in plugin and customize it
+## Contributing
 
-- Type: `string`
-- Default: 'background_sprite'
+See [Contributing Guide](https://github.com/vusion/DOCUMENTATION/issues/8)
 
+## License
 
-#### retina
-
-Whether add retina image, this option accept retina image path, if you don't set retina image path,
-We will search for an image file with @2x in the same folder as the image of retina. For example /images/test.png@sprite&retina we will go to find /images/test@2x.png. you can also use retina3x or retina4x, we will adaptation screen with 3dppx or 4dppx
-
-- Type: `string`
-- Default: 'background_sprite'
-
-
+[MIT](LICENSE)

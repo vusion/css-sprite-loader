@@ -21,7 +21,7 @@ class ImageSpritePlugin {
             output: './',
             padding: PADDING,
             queryParam: 'sprite',
-            defaultName: 'background_sprite',
+            defaultName: 'sprite',
             filter: 'query',
             plugins: [],
             publicPath: undefined,
