@@ -1,33 +1,80 @@
-body .icon{
-    height: 200px;
+body {
+    margin: 0;
+}
+
+.part {
+    display: inline-block;
+    width: 50%;
+}
+
+.source:nth-child(1) {
+    width: 128px;
+    height: 128px;
+    background-image: url('../../images/adaptive.png');
+}
+
+.sprite:nth-child(1) {
+    width: 128px;
+    height: 128px;
+    background-image: url('../../images/adaptive.png?sprite');
+}
+
+.source:nth-child(2) {
+    width: 100px;
+    height: 100px;
+    background-image: url('../../images/calculator.png');
+    background-size: 100%;
+}
+
+.sprite:nth-child(2) {
+    width: 100px;
+    height: 100px;
+    background-image: url('../../images/calculator.png?sprite');
+    background-size: 100%;
+}
+
+.source:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    background-image: url('../../images/calculator.png');
+    background-position: 40px -40px;
+}
+
+.sprite:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    background-image: url('../../images/calculator.png?sprite');
+    background-position: 40px -40px;
+}
+
+.source:nth-child(4) {
+    width: 100px;
+    height: 100px;
+    background-image: url('../../images/gift.png');
+    background-size: 100%;
+    background-position: 40px -40px;
+}
+
+.sprite:nth-child(4) {
+    width: 100px;
+    height: 100px;
+    background-image: url('../../images/gift.png?sprite');
+    background-size: 100%;
+    background-position: 40px -40px;
+}
+
+.source:nth-child(5) {
     width: 200px;
-    background-image: url('../../icons/compare.png?sprite=test');
-    background-size: 100%;
-    background-position: 10px 10px;
-}
-.icon-1{
     height: 200px;
-    width: 100px;
-    background: url('../../icons/compress.png?sprite=test');
-    background-size: 100%;
+    background-image: url('../../images/html.png');
+    background-size: 200px 100px;
+    background-position: 40px -40px;
 }
-.icon-2{
-    height: 100px;
-    width: 100px;
-    background: url('../../icons/diff.png?sprite=test');
-}
-.icon-3{
-    height: 120px;
-    width: 180px;
-    background: url('../../icons/rank.png?sprite=test');
-    background-size: 100%;
-}
-.icon-4{
-    height: 100px;
-    width: 100px;
-    background: url('../../icons/schema.png?sprite=test');
-    background-size: 100%;
-}
-.test{
-    color: red;
+
+.sprite:nth-child(5) {
+    width: 200px;
+    height: 200px;
+    background-image: url('../../images/html.png?sprite');
+    background-size: 200px 100px;
+    background-position: 40px -40px;
 }

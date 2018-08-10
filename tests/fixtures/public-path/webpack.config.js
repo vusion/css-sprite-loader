@@ -1,7 +1,5 @@
 const IconFontPlugin = require('../../../index').Plugin;
-const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
 
 module.exports = {
     entry: {
@@ -10,16 +8,16 @@ module.exports = {
     output: {
         path: __dirname + '/dest',
         filename: '[name].js',
-        publicPath:"/public/"
+        publicPath: '/dest/',
     },
     module: {
-        rules: [{ 
-            test: /\.css$/, 
+        rules: [{
+            test: /\.css$/,
             use: ExtractTextPlugin.extract({
-                fallback: "style-loader",
-                use: ["css-loader", require.resolve('../../../index')],
-            })
-        }]
+                fallback: 'style-loader',
+                use: ['css-loader', require.resolve('../../../index')],
+            }),
+        }],
     },
     plugins: [new IconFontPlugin({
         output: '/static/image',

@@ -10,7 +10,10 @@ module.exports = {
         filename: '[name].js',
     },
     module: {
-        rules: [{ test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../../../index')] }],
+        rules: [
+            { test: /\.png$/, use: ['file-loader'] },
+            { test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../../../index')] },
+        ],
     },
     plugins: [new CssSpritePlugin()],
 };
