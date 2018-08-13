@@ -24,7 +24,7 @@ Just add a `?sprite` query after background image url:
 
 ``` css
 .foo {
-    background: url('../icons/compare.png?sprite');
+    background: url('../assets/gift.png?sprite');
 }
 ```
 
@@ -67,11 +67,11 @@ Whether add this image into sprite image and set which sprite image
 
 ``` css
 .foo {
-    background: url('../icons/compare.png?sprite');
+    background: url('../assets/gift.png?sprite');
 }
 
 .bar {
-    background: url('../icons/message.png?sprite=sprite-nav');
+    background: url('../assets/light.png?sprite=sprite-nav');
 }
 ```
 

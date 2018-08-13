@@ -9,8 +9,7 @@
   "scripts": {
     "precommit": "bash node_modules/vusion-hooks/pre-commit",
     "test": "mocha --timeout 5000 ./tests/final.test.js",
-    "eslint": "eslint ./src",
-    "eslint-fix": "eslint ./src --fix"
+    "eslint": "eslint ./src --fix"
   },
   "main": "./index.js",
   "repository": "vusion/css-sprite-loader",
@@ -20,28 +19,28 @@
   "license": "MIT",
   "keywords": [
     "css",
-    "icon",
+    "image",
+    "png",
     "sprite",
     "webpack",
     "loader"
   ],
   "tags": [
     "css",
-    "icon",
+    "image",
+    "png",
     "sprite",
     "webpack",
     "loader"
   ],
   "dependencies": {
-    "css": "^2.2.1",
-    "handlebars": "^4.0.10",
     "image-size": "^0.6.2",
     "postcss": "^6.0.16",
-    "shelljs": "^0.7.8",
     "spritesmith": "^3.2.1",
     "webpack-sources": "^1.0.1"
   },
   "devDependencies": {
+    "autoprefixer": "^9.1.1",
     "chai": "^4.1.2",
     "css-loader": "^0.28.4",
     "eslint": "^4.15.0",
@@ -54,6 +53,7 @@
     "postcss-loader": "^3.0.0",
     "postcss-px-to-viewport": "^0.0.3",
     "postcss-viewport-units": "^0.1.4",
+    "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
     "vusion-hooks": "^0.1.1",

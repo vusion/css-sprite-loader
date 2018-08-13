@@ -10,7 +10,7 @@
 
 ``` css
 .foo {
-    background: url('../icons/compare.png?sprite');
+    background: url('../images/gift.png?sprite');
 }
 ```
 
@@ -53,11 +53,11 @@ module.exports = {
 
 ``` css
 .foo {
-    background: url('../icons/compare.png?sprite');
+    background: url('../images/gift.png?sprite');
 }
 
 .bar {
-    background: url('../icons/message.png?sprite=sprite-nav');
+    background: url('../images/light.png?sprite=sprite-nav');
 }
 ```
 

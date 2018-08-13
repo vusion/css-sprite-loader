@@ -1,0 +1,262 @@
+body {
+    margin: 0;
+}
+
+.part {
+    display: inline-block;
+    width: 50%;
+}
+
+.source.simple {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/home.png');
+}
+.sprite.simple {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/home.png?sprite');
+}
+
+.source.bg-image {
+    width: 128px;
+    height: 128px;
+    background-image: url('../../images/home.png');
+}
+.sprite.bg-image {
+    width: 128px;
+    height: 128px;
+    background-image: url('../../images/home.png?sprite');
+}
+
+.source.with-color {
+    width: 128px;
+    height: 128px;
+    background: #eee url('../../images/home.png');
+}
+.sprite.with-color {
+    width: 128px;
+    height: 128px;
+    background: #eee url('../../images/home.png?sprite');
+}
+
+.source.with-color-outside {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/home.png');
+    background-color: #eee;
+}
+.sprite.with-color-outside {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/home.png?sprite');
+    background-color: #eee;
+}
+
+.source.with-color-override {
+    width: 128px;
+    height: 128px;
+    background-color: #eee;
+    background: url('../../images/home.png');
+}
+.sprite.with-color-override {
+    width: 128px;
+    height: 128px;
+    background-color: #eee;
+    background: url('../../images/home.png?sprite');
+}
+
+.source.bg-size {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png');
+    background-size: 100%;
+}
+.sprite.bg-size {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png?sprite');
+    background-size: 100%;
+}
+
+.source.bg-size-pixel {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png');
+    background-size: 80px;
+}
+.sprite.bg-size-pixel {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png?sprite');
+    background-size: 80px;
+}
+
+.source.bg-size-height {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png');
+    background-size: auto 120px;
+}
+.sprite.bg-size-height {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png?sprite');
+    background-size: auto 120px;
+}
+
+.source.bg-size-cover {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png');
+    background-size: cover;
+}
+.sprite.bg-size-cover {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png?sprite');
+    background-size: cover;
+}
+
+.source.bg-size-contain {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png');
+    background-size: contain;
+}
+.sprite.bg-size-contain {
+    width: 100px;
+    height: 150px;
+    background-image: url('../../images/lollipop.png?sprite');
+    background-size: contain;
+}
+
+.source.bg-size-override {
+    width: 100px;
+    height: 150px;
+    background-size: 100%;
+    background: url('../../images/lollipop.png');
+}
+.sprite.bg-size-override {
+    width: 100px;
+    height: 150px;
+    background-size: 100%;
+    background: url('../../images/lollipop.png?sprite');
+}
+
+.source.bg-position {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/tag.png') 60px -40px no-repeat;
+}
+.sprite.bg-position {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/tag.png?sprite') 60px -40px no-repeat;
+}
+
+.source.bg-position-outside {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/tag.png') no-repeat;
+    background-position: 60px -40px;
+}
+.sprite.bg-position-outside {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/tag.png?sprite') no-repeat;
+    background-position: 60px -40px;
+}
+
+.source.bg-position-override {
+    width: 128px;
+    height: 128px;
+    background-position: 60px -40px;
+    background: url('../../images/tag.png') no-repeat;
+}
+.sprite.bg-position-override {
+    width: 128px;
+    height: 128px;
+    background-position: 60px -40px;
+    background: url('../../images/tag.png?sprite') no-repeat;
+}
+
+.source.bg-position-and-size {
+    width: 100px;
+    height: 150px;
+    background: url('../../images/html.png') 60px -40px;
+    background-size: 100%;
+}
+.sprite.bg-position-and-size {
+    width: 100px;
+    height: 150px;
+    background: url('../../images/html.png?sprite') 60px -40px;
+    background-size: 100%;
+}
+
+.source.bg-position-and-size-outside {
+    width: 200px;
+    height: 200px;
+    background: url('../../images/html.png');
+    background-size: 200px 100px;
+    background-position: 60px -40px;
+}
+.sprite.bg-position-and-size-outside {
+    width: 200px;
+    height: 200px;
+    background: url('../../images/html.png?sprite');
+    background-size: 200px 100px;
+    background-position: 60px -40px;
+}
+
+.source.without-image-set {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png');
+}
+.sprite.without-image-set {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png?sprite');
+}
+
+.source.image-set {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png') 1x, url('../../images/retina/angry-birds@2x.png') 2x);
+}
+.sprite.image-set {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
+}
+
+.source.image-set-fallback {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png') 1x, url('../../images/retina/angry-birds@2x.png') 2x);
+}
+.sprite.image-set-fallback {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png?sprite');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
+}
+
+.source.image-set-and-others {
+    width: 100px;
+    height: 150px;
+    background: url('../../images/retina/angry-birds.png');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png') 1x, url('../../images/retina/angry-birds@2x.png') 2x);
+    background-size: 80%;
+    background-position: 60px 40px;
+}
+.sprite.image-set-and-others {
+    width: 100px;
+    height: 150px;
+    background: url('../../images/retina/angry-birds.png?sprite');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
+    background-size: 80%;
+    background-position: 60px 40px;
+}
