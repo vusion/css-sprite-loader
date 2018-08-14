@@ -1,0 +1,86 @@
+body {
+    margin: 0;
+}
+
+.part {
+    display: inline-block;
+    width: 50%;
+}
+
+.source.simple {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png');
+    background-size: 100%;
+}
+.sprite.simple {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png?sprite');
+    background-size: 100%;
+}
+
+.source.retina {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds@2x.png');
+    background-size: 100%;
+}
+.sprite.retina {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png?sprite&retina');
+    background-size: 100%;
+}
+
+.source.retina4x {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds@4x.png');
+    background-size: 100%;
+}
+.sprite.retina4x {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png?sprite&retina&retina3x&retina4x');
+    background-size: 100%;
+}
+
+.source.simple-2 {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/captain-america.png');
+    background-size: 100%;
+}
+.sprite.simple-2 {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/captain-america.png?sprite');
+    background-size: 100%;
+}
+
+.source.retina-2 {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/captain-america@2x.png');
+    background-size: 100%;
+}
+.sprite.retina-2 {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/captain-america.png?sprite&retina');
+    background-size: 100%;
+}
+
+.source.retina4x-2 {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/captain-america@4x.png');
+    background-size: 100%;
+}
+.sprite.retina4x-2 {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/captain-america.png?sprite&retina&retina3x&retina4x');
+    background-size: 100%;
+}
