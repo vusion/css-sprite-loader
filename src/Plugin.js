@@ -23,6 +23,7 @@ class ImageSpritePlugin {
             queryParam: 'sprite',
             defaultName: 'sprite',
             filter: 'query',
+            filename: '[name].[ext]?[hash]',
             plugins: [],
             publicPath: undefined,
         }, options);
@@ -68,15 +69,11 @@ class ImageSpritePlugin {
         this.images = images;
         const imageList = pickPicture(images, this.options.queryParam);
         const task = [];
+        const filename = this.options.filename;
         for (const target of Object.keys(imageList)) {
             const paths = imageList[target].path;
             const path2img = imageList[target].path2img;
-            const targetFile = target + '.png';
-            let imageUrl = '/';
-            if (this.options.publicPath)
-                imageUrl = utils.urlResolve(this.options.publicPath, targetFile);
-            else
-                imageUrl = utils.urlResolve(compilation.options.output.publicPath || '', path.join(this.options.output, targetFile));
+
             const promiseInstance = new Promise((res, rej) => {
                 Spritesmith.run({
                     src: paths,
@@ -93,6 +90,15 @@ class ImageSpritePlugin {
                 const coordinates = result.coordinates;
                 const assets = compilation.assets;
                 const imagePromises = [];
+                const targetFile = utils.createFileName(filename, {
+                    name: target, ext: 'png', content: result.image,
+                });
+                let imageUrl = '/';
+                if (this.options.publicPath)
+                    imageUrl = utils.urlResolve(this.options.publicPath, targetFile);
+                else
+                    imageUrl = utils.urlResolve(compilation.options.output.publicPath || '', path.join(this.options.output, targetFile));
+
                 for (const path of Object.keys(coordinates)) {
                     const image = path2img[path];
                     const baseTarget = image.baseTarget;
@@ -105,7 +111,7 @@ class ImageSpritePlugin {
                         image.replaceCss = css;
                     }));
                 }
-                assets[path.join(this.options.output, target + '.png')] = {
+                assets[path.join(this.options.output, targetFile)] = {
                     source: () => result.image,
                     size: () => result.image.length,
                 };
@@ -231,7 +237,7 @@ class ImageSpritePlugin {
     createCss(imageUrl, image, properties, isRetina, baseImage) {
         let { x, y, hash } = image.message;
         let { width, height } = properties;
-        let result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;}`;
+        let result = `.root{ background: url(${imageUrl}) no-repeat;}`;
         if (isRetina) {
             const imageWidth = image.message.width;
             const imageHeight = image.message.height;
@@ -239,7 +245,7 @@ class ImageSpritePlugin {
             const baseHeight = baseImage.size.height;
             const proportionWidth = baseWidth / imageWidth;
             const proportionHeight = baseHeight / imageHeight;
-            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px; }`;
+            result = `.root{ background: url(${imageUrl}) no-repeat  -${Math.floor(x * proportionWidth)}px -${Math.floor(y * proportionHeight)}px;background-size:${Math.floor(width * proportionWidth)}px ${Math.floor(height * proportionHeight)}px; }`;
         } else {
             let basicWidth = image.message.width;
             let basicHeight = image.message.height;
@@ -284,7 +290,7 @@ class ImageSpritePlugin {
                 x = x - parseInt(image.position[0]);
                 y = y - parseInt(image.position[1]);
             }
-            result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  ${(-x).toString()}px ${(-y).toString()}px;background-size:${width}px ${height}px; }`;
+            result = `.root{ background: url(${imageUrl}) no-repeat  ${(-x).toString()}px ${(-y).toString()}px;background-size:${width}px ${height}px; }`;
         }
         return new Promise((res, rej) => {
             postcss(this.options.plugins).process(result).then((result) => {
