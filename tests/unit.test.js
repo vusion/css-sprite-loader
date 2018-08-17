@@ -27,12 +27,12 @@ describe('icon font plugin api test:', () => {
             ['public', '/font/icon-font.eot', 'public/font/icon-font.eot'],
             ['public/', 'font/icon-font.eot', 'public/font/icon-font.eot'],
             ['public/', '/font/icon-font.eot', 'public/font/icon-font.eot'],
-        ]
+        ];
         urlList.forEach((urls) => {
             const resultEql = urls[2];
             const result = utils.urlResolve(urls[0], urls[1]);
             expect(result).to.eql(resultEql);
-        }) 
+        });
         done();
     });
 });

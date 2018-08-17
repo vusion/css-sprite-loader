@@ -10,14 +10,14 @@ const value = 'retina';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
 
 describe('Webpack Integration Tests', () => {
-    const buildCLI = path.resolve(__dirname,'../node_modules/.bin/webpack');
-    const runDir = path.join('../tests/fixtures/'+value);
-    const outputDirectory = path.join('./fixtures/'+value+'/dest');
+    const buildCLI = path.resolve(__dirname, '../node_modules/.bin/webpack');
+    const runDir = path.join('../tests/fixtures/' + value);
+    const outputDirectory = path.join('./fixtures/' + value + '/dest');
     before(() => {
         shell.cd(path.resolve(__dirname, runDir));
     });
     afterEach(() => {
-        shell.rm('-rf',path.resolve(__dirname, outputDirectory));
+        shell.rm('-rf', path.resolve(__dirname, outputDirectory));
     });
 
     it('#test retina config: ' + value, (done) => {
@@ -32,19 +32,19 @@ describe('Webpack Integration Tests', () => {
                 'test@3x.png',
                 'test@4x.png',
             ]);
-            const filesContent = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/background_sprite.png'));
+            const filesContent = fs.readFileSync(path.resolve(__dirname, outputDirectory + '/background_sprite.png'));
             const md5Code = utils.md5Create(filesContent);
             expect(md5Code).to.eql('771775153233326edb09bcc9bbbf52ed');
-            const filesContent2 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/test.png'));
+            const filesContent2 = fs.readFileSync(path.resolve(__dirname, outputDirectory + '/test.png'));
             const md5Code2 = utils.md5Create(filesContent2);
             expect(md5Code2).to.eql('e1645b7464e7a59bbc9466b7f4f1562b');
-            const filesContent3 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/background_sprite@2x.png'));
+            const filesContent3 = fs.readFileSync(path.resolve(__dirname, outputDirectory + '/background_sprite@2x.png'));
             const md5Code3 = utils.md5Create(filesContent);
             expect(md5Code3).to.eql('771775153233326edb09bcc9bbbf52ed');
-            const filesContent4 = fs.readFileSync(path.resolve(__dirname,outputDirectory+'/test@2x.png'));
+            const filesContent4 = fs.readFileSync(path.resolve(__dirname, outputDirectory + '/test@2x.png'));
             const md5Code4 = utils.md5Create(filesContent2);
             expect(md5Code4).to.eql('e1645b7464e7a59bbc9466b7f4f1562b');
-            const cssContent = fs.readFileSync(path.resolve(__dirname, outputDirectory+'/bundle.js')).toString();
+            const cssContent = fs.readFileSync(path.resolve(__dirname, outputDirectory + '/bundle.js')).toString();
             expect(replaceReg.test(cssContent)).to.eql(false);
             done();
         });
