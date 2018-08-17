@@ -9,9 +9,6 @@ const getAllModules = require('./getAllModules');
 const ReplaceSource = require('webpack-sources').ReplaceSource;
 const NAMESPACE = 'CssSpritePlugin';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
-const replaceBackgroundReg = /background-image/;
-const backGroundPositionReg = /background-position/;
-const backGroundSizeReg = /background-size/;
 const ReplaceDependency = require('./replaceDependecy');
 const NullFactory = require('webpack/lib/NullFactory');
 
@@ -58,6 +55,7 @@ class ImageSpritePlugin {
     }
     afterPlugins() {
         this.images = {};
+        this.localImageList = {};
     }
     optimizeTree(callback, compilation) {
         let imagePaths = Object.keys(this.images);
@@ -77,6 +75,7 @@ class ImageSpritePlugin {
                 imageUrl = utils.urlResolve(this.options.publicPath, targetFile);
             else
                 imageUrl = utils.urlResolve(compilation.options.output.publicPath || '', path.join(this.options.output, targetFile));
+
             const promiseInstance = new Promise((res, rej) => {
                 Spritesmith.run({
                     src: paths,
@@ -93,7 +92,20 @@ class ImageSpritePlugin {
                 const coordinates = result.coordinates;
                 const assets = compilation.assets;
                 const imagePromises = [];
-                for (const path of Object.keys(coordinates)) {
+
+                for (const name of Object.keys(this.localImageList)) {
+                    const image = this.localImageList[name];
+                    const baseTarget = image.baseTarget;
+                    let baseImage;
+                    if (baseTarget)
+                        baseImage = images[baseTarget];
+                    image.message = coordinates[image.path];
+                    image.message.hash = utils.md5Create(result.image);
+                    imagePromises.push(this.createCss(imageUrl, image, result.properties, image.isRetina, baseImage).then((css) => {
+                        image.replaceCss = css;
+                    }));
+                }
+                /* for (const path of Object.keys(coordinates)) {
                     const image = path2img[path];
                     const baseTarget = image.baseTarget;
                     let baseImage;
@@ -104,7 +116,7 @@ class ImageSpritePlugin {
                     imagePromises.push(this.createCss(imageUrl, image, result.properties, image.isRetina, baseImage).then((css) => {
                         image.replaceCss = css;
                     }));
-                }
+                }*/
                 assets[path.join(this.options.output, target + '.png')] = {
                     source: () => result.image,
                     size: () => result.image.length,
@@ -159,8 +171,9 @@ class ImageSpritePlugin {
     afterOptimizeTree(compilation) {
         const allModules = getAllModules(compilation);
         const images = {};
-        for (const path of Object.keys(this.images)) {
-            const image = this.images[path];
+        const newImg = [];
+        for (const path of Object.keys(this.localImageList)) {
+            const image = this.localImageList[path];
             images[image.name] = image;
         }
         allModules.forEach((module) => {
@@ -168,9 +181,9 @@ class ImageSpritePlugin {
             const source = module._source;
             let range = [];
             if (typeof source === 'string') {
-                range = this.replaceHolder(module._source, replaceReg, images);
+                range = this.replaceHolder(module._source, replaceReg, images, newImg);
             } else if (typeof source === 'object' && typeof source._value === 'string') {
-                range = this.replaceHolder(source._value, replaceReg, images);
+                range = this.replaceHolder(source._value, replaceReg, images, newImg);
             }
             if (range.length > 0) {
                 if (replaceDependency) {
@@ -184,49 +197,95 @@ class ImageSpritePlugin {
     normalModuleLoader(loaderContext) {
         loaderContext.ImageSpritePlugin = this;
     }
-    replaceHolder(value, replaceReg, images) {
+    replaceHolder(value, replaceReg, images, newImg) {
         const rangeList = [];
         const haveChecked = [];
+        let num = 0;
         value.replace(replaceReg, ($1, $2) => {
-            if (images[$1] && haveChecked.indexOf($1) === -1) {
-                haveChecked.push($1);
-                const content = images[$1] ? images[$1].replaceCss || $1 : $1;
-                let index = value.indexOf($1);
-                while (index !== -1) {
-                    rangeList.push([index, index + $1.length, content]);
-                    index = value.indexOf($1, index + 1);
-                }
-            }
-            return $1;
-        });
-        value.replace(replaceBackgroundReg, ($1, $2) => {
+            haveChecked.push($1);
+            const content = images[$1] ? images[$1].replaceCss : $1;
             let index = value.indexOf($1);
             while (index !== -1) {
-                rangeList.push([index, index + $1.length, 'background:']);
+                rangeList.push([index, index + $1.length, content]);
                 index = value.indexOf($1, index + 1);
             }
-            return $1;
-        });
-        value.replace(backGroundPositionReg, ($1, $2) => {
-            let index = value.indexOf($1);
-            while (index !== -1) {
-                rangeList.push([index, index + $1.length, '']);
-                index = value.indexOf($1, index + 1);
-            }
-            return $1;
-        });
-        value.replace(backGroundSizeReg, ($1, $2) => {
-            let index = value.indexOf($1);
-            while (index !== -1) {
-                rangeList.push([index, index + $1.length, '']);
-                index = value.indexOf($1, index + 1);
-            }
+            num++;
             return $1;
         });
         return rangeList;
     }
     replaceStringHolder(value, replaceReg, images) {
         return value.replace(replaceReg, (name) => images[name] ? images[name].replaceCss || name : name);
+    }
+
+    generateBG(num, loc, step, padding) {
+        const length = step * num + padding * (num - 1);
+        const location = (loc - 1) * (step + padding);
+        return [length, location];
+    }
+
+    generateStep(type, image, direction) {
+        const maxValue = parseInt(image.divWidth) >= parseInt(image.divHeight) ? parseInt(image.divWidth) : parseInt(image.divHeight);
+        const minValue = parseInt(image.divWidth) >= parseInt(image.divHeight) ? parseInt(image.divHeight) : parseInt(image.divWidth);
+        const ratioReg = /%$/;
+        let stepLength;
+        let paddingLength;
+        if (ratioReg.test(type)) {
+            stepLength = direction === 0 ? parseInt(image.divWidth) * parseInt(type) * 0.01 : parseInt(image.divHeight) * parseInt(type) * 0.01;
+            paddingLength = direction === 0 ? stepLength / parseInt(image.message.width) * PADDING : stepLength / parseInt(image.message.height) * PADDING;
+            return [stepLength, paddingLength];
+        } else if (type === 'auto') {
+            stepLength = direction === 0 ? parseInt(image.divWidth) : parseInt(image.divHeight);
+            paddingLength = direction === 0 ? stepLength / parseInt(image.message.width) * PADDING : stepLength / parseInt(image.message.height) * PADDING;
+            return [stepLength, paddingLength];
+        } else if (type === 'cover') {
+            stepLength = maxValue;
+            paddingLength = maxValue / parseInt(image.message.width) * PADDING;
+            return [stepLength, paddingLength];
+        } else if (type === 'contain') {
+            stepLength = minValue;
+            paddingLength = minValue / parseInt(image.message.width) * PADDING;
+            return [stepLength, paddingLength];
+        } else {
+            stepLength = direction === 0 ? parseInt(image.backgroundSize[0]) : parseInt(image.backgroundSize[1]);
+            paddingLength = direction === 0 ? stepLength / parseInt(image.message.width) * PADDING : stepLength / parseInt(image.message.height) * PADDING;
+            return [stepLength, paddingLength];
+        }
+    }
+
+    calculateBG(image, BGarray, hNum, vNum, xNum, yNum) {
+        if (BGarray.length === 1) {
+            const stepWidth = this.generateStep(BGarray[0], image, 0)[0];
+            const stepPadding = this.generateStep(BGarray[0], image, 0)[1];
+            const horizonValue = this.generateBG(hNum, xNum, stepWidth, stepPadding);
+            const verticalValue = this.generateBG(vNum, yNum, stepWidth, stepPadding);
+            return [...horizonValue, ...verticalValue];
+        } else if (BGarray[0] === 'auto' || BGarray[1] === 'auto') {
+            let stepWidth, stepHeight, stepYpadding, stepXpadding, horizonValue, verticalValue;
+            if (BGarray[0] === 'auto') {
+                stepHeight = this.generateStep(BGarray[1], image, 1)[0];
+                stepWidth = stepHeight * (image.message.width / image.message.height);
+                stepYpadding = this.generateStep(BGarray[1], image, 1)[1];
+                horizonValue = this.generateBG(hNum, xNum, stepWidth, stepYpadding);
+                verticalValue = this.generateBG(vNum, yNum, stepHeight, stepYpadding);
+                return [...horizonValue, ...verticalValue];
+            } else {
+                stepWidth = this.generateStep(BGarray[0], image, 0)[0];
+                stepHeight = stepWidth * (image.message.height / image.message.width);
+                stepXpadding = this.generateStep(BGarray[0], image, 0)[1];
+                horizonValue = this.generateBG(hNum, xNum, stepWidth, stepXpadding);
+                verticalValue = this.generateBG(vNum, yNum, stepHeight, stepXpadding);
+                return [...horizonValue, ...verticalValue];
+            }
+        } else {
+            const stepWidth = this.generateStep(BGarray[0], image, 0)[0];
+            const stepHeight = this.generateStep(BGarray[1], image, 1)[0];
+            const stepXpadding = this.generateStep(BGarray[0], image, 0)[1];
+            const stepYpadding = this.generateStep(BGarray[1], image, 1)[1];
+            const horizonValue = this.generateBG(hNum, xNum, stepWidth, stepXpadding);
+            const verticalValue = this.generateBG(vNum, yNum, stepHeight, stepYpadding);
+            return [...horizonValue, ...verticalValue];
+        }
     }
     createCss(imageUrl, image, properties, isRetina, baseImage) {
         let { x, y, hash } = image.message;
@@ -266,24 +325,20 @@ class ImageSpritePlugin {
                 basicY = basicY - image.message.height - PADDING;
             }
             if (image.backgroundSize) {
-                if (image.backgroundSize.length === 2) {
-                    width = horizontalNum * parseInt(image.backgroundSize[0]) + PADDING * (horizontalNum - 1);
-                    height = verticalNum * parseInt(image.backgroundSize[1]) + PADDING * (verticalNum - 1);
-                    x = (itemRow - 1) * (parseInt(image.backgroundSize[0]) + PADDING);
-                    y = (itemCol - 1) * (parseInt(image.backgroundSize[1]) + PADDING);
-                } else if (typeof image.backgroundSize === 'string') {
-                    if (image.divWidth && image.divHeight) {
-                        width = horizontalNum * parseInt(image.divWidth) + PADDING * (horizontalNum - 1);
-                        height = verticalNum * parseInt(image.divHeight) + PADDING * (verticalNum - 1);
-                        x = (itemRow - 1) * (parseInt(image.divWidth) + PADDING);
-                        y = (itemCol - 1) * (parseInt(image.divHeight) + PADDING);
-                    }
-                }
+                const result = this.calculateBG(image, image.backgroundSize, horizontalNum, verticalNum, itemRow, itemCol);
+                width = result[0];
+                x = result[1];
+                height = result[2];
+                y = result[3];
             }
             if (image.position) {
                 x = x - parseInt(image.position[0]);
                 y = y - parseInt(image.position[1]);
             }
+            x = Math.floor(x);
+            y = Math.floor(y);
+            width = Math.floor(width);
+            height = Math.floor(height);
             result = `.root{ background: url(${imageUrl}?${hash}) no-repeat  ${(-x).toString()}px ${(-y).toString()}px;background-size:${width}px ${height}px; }`;
         }
         return new Promise((res, rej) => {

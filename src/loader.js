@@ -91,6 +91,7 @@ function checkIfPositionAssigned(image, Node) {
         Node.walkDecls('background-position', (declaration) => {
             if (declaration) {
                 image.position = declaration.value.split(' ');
+                declaration.remove();
             }
         });
     }
@@ -101,7 +102,10 @@ function checkIfBGsizeAssigned(image, Node) {
     if (Node) {
         Node.walkDecls('background-size', (declaration) => {
             if (declaration) {
-                image.backgroundSize = ratioReg.test(declaration) ? declaration.value : declaration.value.split(' ');
+                const bgSize = declaration.value.split(' ');
+                image.backgroundSize = bgSize;
+                // image.backgroundSize = ratioReg.test(declaration) ? declaration.value : declaration.value.split(' ');
+                declaration.remove();
             }
         });
     }
@@ -122,29 +126,32 @@ function checkDivWidthHeight(image, Node) {
     }
 }
 
-function addImageToList(image, imageList, declaration, parentNode) {
-    const positionArr = declaration.value.split(' ').slice(1, 3);
-    if (positionArr.length === 2) {
-        image.position = positionArr;
+function addImageToList(image, imageList, localImgList, declaration, parentNode) {
+    let blockString = '';
+    parentNode.walk((dec) => {
+        blockString = blockString + dec.prop + ':' + dec.value + ';';
+    });
+    const newHash = 'image-' + utils.md5Create(blockString);
+    if (image.merge) {
+        const positionArr = declaration.value.split(' ').slice(1, 3);
+        if (positionArr.length === 2) {
+            image.position = positionArr;
+        }
+        checkIfPositionAssigned(image, parentNode);
+        checkIfBGsizeAssigned(image, parentNode);
+        checkDivWidthHeight(image, parentNode);
     }
-    checkIfPositionAssigned(image, parentNode);
-    checkIfBGsizeAssigned(image, parentNode);
-    checkDivWidthHeight(image, parentNode);
-
     if (image.merge) {
         const path = image.path;
-        let hash;
-        if (imageList[path]) {
-            hash = imageList[path].hash;
-        } else {
-            const filesContent = fs.readFileSync(path);
-            hash = 'image-' + utils.md5Create(filesContent);
-            image.hash = hash;
-            image.size = sizeOf(filesContent);
-            imageList[path] = image;
-        }
-        const name = 'REPLACE_BACKGROUND(' + hash + ')';
+        const filesContent = fs.readFileSync(path);
+        image.hash = newHash;
+        image.size = sizeOf(filesContent);
+        imageList[path] = image;
+        const name = 'REPLACE_BACKGROUND(' + newHash + ')';
         image.name = name;
+        if (declaration.prop === 'background-image') {
+            declaration.prop = 'background';
+        }
         declaration.value = name;
         if (image.retinas.length > 0) {
             return {
@@ -153,14 +160,59 @@ function addImageToList(image, imageList, declaration, parentNode) {
                 image,
             };
         }
+        localImgList[name] = image;
     }
+
     return undefined;
+}
+
+function cleanOverride(rule) {
+    const decls = {};
+    rule.walk((node) => {
+        decls[node.prop] = node;
+        node.remove();
+    });
+    for (const decl of Object.keys(decls)) {
+        rule.append(decls[decl]);
+    }
+    if (decls['background-image'] && decls.background) {
+        let bgIndex = rule.index(decls.background);
+        const ImgIndex = rule.index(decls['background-image']);
+        if (bgIndex > ImgIndex) {
+            rule.walk((node) => {
+                if (rule.index(node) < bgIndex && backgroundReg.test(node.prop)) {
+                    node.remove();
+                    bgIndex--;
+                }
+            });
+        } else {
+            rule.walkDecls('background', (declaration) => {
+                const urlReg = /url\(['"]?.*?['"]?\)/;
+                declaration.value = declaration.value.replace(urlReg, decls['background-image'].value);
+            });
+            rule.walk((node) => {
+                if (node.prop === 'background-image') {
+                    node.remove();
+                }
+            });
+        }
+    } else if (decls.background) {
+        let bgIndex = rule.index(decls.background);
+        rule.walk((node) => {
+            if (rule.index(node) < bgIndex && backgroundReg.test(node.prop)) {
+                node.remove();
+                bgIndex--;
+            }
+        });
+    }
+    return rule;
 }
 
 function ImageSpriteLoader(source) {
     const ImageSpritePlugin = this.ImageSpritePlugin;
     const ast = typeof source === 'string' ? css.parse(source) : source;
     const imageList = ImageSpritePlugin.images;
+    const localImageList = ImageSpritePlugin.localImageList;
     const callback = this.async();
     const promises = [];
     const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
@@ -169,21 +221,16 @@ function ImageSpriteLoader(source) {
     defaultName = ImageSpritePlugin.options.defaultName;
     filter = ImageSpritePlugin.options.filter;
     ast.walkRules((rule) => {
-        rule.walk((node) => {
+        const Newrule = cleanOverride(rule);
+        Newrule.walk((node) => {
             if (node.prop === 'background' || node.prop === 'background-image') {
-                promises.push(analysisBackground.call(this, node.value, this.context, rule).then((image) => {
-                    const retina = addImageToList(image, imageList, node, rule);
+                promises.push(analysisBackground.call(this, node.value, this.context, Newrule).then((image) => {
+                    const retina = addImageToList(image, imageList, localImageList, node, Newrule);
                     return retina;
                 }));
             }
         });
     });
-    /* ast.walkDecls(backgroundReg, (declaration) => {
-        promises.push(analysisBackground.call(this, declaration.value, this.context).then((image) => {
-            const retina = addImageToList(image, imageList, declaration);
-            return retina;
-        }));
-    });*/
     Promise.all(promises).then((results) => {
         function finish() {
             let cssStr = '';

@@ -10,7 +10,7 @@ body {
 .source.simple {
     width: 128px;
     height: 128px;
-    background: url('../../images/home.png');
+    background: url('../../images/home.png') no-repeat;
 }
 .sprite.simple {
     width: 128px;
@@ -18,12 +18,12 @@ body {
     background: url('../../images/home.png?sprite');
 }
 
-.source.bg-image {
+.source.background-image {
     width: 128px;
     height: 128px;
     background-image: url('../../images/home.png');
 }
-.sprite.bg-image {
+.sprite.background-image {
     width: 128px;
     height: 128px;
     background-image: url('../../images/home.png?sprite');

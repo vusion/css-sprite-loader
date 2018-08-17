@@ -4,7 +4,7 @@ body {
 
 .part {
     display: inline-block;
-    width: 50%;
+    width: 48%;
 }
 
 .source:nth-child(1) {
@@ -58,9 +58,8 @@ body {
 .sprite:nth-child(4) {
     width: 100px;
     height: 100px;
-    background-image: url('../../images/gift.png?sprite');
+    background: url('../../images/calculator.png?sprite') 40px -40px;
     background-size: 100%;
-    background-position: 40px -40px;
 }
 
 .source:nth-child(5) {
