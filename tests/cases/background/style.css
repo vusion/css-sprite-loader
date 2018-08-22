@@ -17,7 +17,7 @@ body {
     height: 128px;
     background: url('../../images/home.png?sprite');
 }
-
+/*
 .source.background-image {
     width: 128px;
     height: 128px;
@@ -39,8 +39,8 @@ body {
     height: 128px;
     background: #eee url('../../images/home.png?sprite');
 }
-
-.source.with-color-outside {
+*/
+/*..source.with-color-outside {
     width: 128px;
     height: 128px;
     background: url('../../images/home.png');
@@ -231,6 +231,36 @@ body {
     background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
 }
 
+.source.image-set-fallback {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png') 1x, url('../../images/retina/angry-birds@2x.png') 2x);
+}
+.sprite.image-set-fallback {
+    width: 128px;
+    height: 128px;
+    background: url('../../images/retina/angry-birds.png?sprite');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
+}
+
+.source.image-set-and-others {
+    width: 100px;
+    height: 150px;
+    background: url('../../images/retina/angry-birds.png');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png') 1x, url('../../images/retina/angry-birds@2x.png') 2x);
+    background-size: 80%;
+    background-position: 60px 40px;
+}
+.sprite.image-set-and-others {
+    width: 100px;
+    height: 150px;
+    background: url('../../images/retina/angry-birds.png?sprite');
+    background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
+    background-size: 80%;
+    background-position: 60px 40px;
+}
+*/
 .source.image-set-fallback {
     width: 128px;
     height: 128px;
