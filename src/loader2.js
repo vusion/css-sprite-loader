@@ -10,6 +10,7 @@ const logger = utils.logger;
 
 const backgroundBlockParser = require('./backgroundBlockParser');
 const analysisBackground = require('./analysisBackground');
+const addImageToList = require('./addImageToList');
 
 let queryParam = 'sprite';
 let defaultName = 'sprite';
@@ -36,8 +37,16 @@ function ImageSpriteLoader(source) {
 	const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
 	const callback = this.async();
 	ast.walkRules((rule) => {
-       const parsedRule = backgroundBlockParser(rule);
-       //analysisBackground.call(this, parsedRule, this.context);
+        const parsedRule = backgroundBlockParser(rule);
+        
+        const UsingThisLoader = !!parsedRule.image || parsedRule.imageSet.length !== 0;
+        if(UsingThisLoader) {
+            logger('parsedRule', parsedRule)
+            analysisBackground.call(this, parsedRule, queryParam, defaultName, filter).then((images) => {
+                addImageToList.call(this, parsedRule, images, rule)
+            })
+        }
+
     });
 
 }

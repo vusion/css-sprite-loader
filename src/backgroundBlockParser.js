@@ -93,7 +93,7 @@ function resolveBackgroundNode(decl, backgroundNomalized){
 			
 		}
 	});
-	logger('backgroundNomalized', backgroundNomalized);
+	//logger('backgroundNomalized', backgroundNomalized);
 	//logger(decl.prop, val)
 
 }
@@ -114,7 +114,7 @@ function backgroundBlockParser(rule){
 	const backgroundNomalized = Object.assign({}, defaultBackground);
 	rule.walkDecls(/^background/, decl => {
 		const p = decl.prop;
-		logger(p, decl.value);
+		//logger(p, decl.value);
 
 		backgroundKeys.forEach(k => {
 			const r = new RegExp(k);
@@ -130,6 +130,7 @@ function backgroundBlockParser(rule){
 		if(/^background$/.test(p)) {
 			resolveBackgroundNode(decl, backgroundNomalized);
 		}
+		backgroundNomalized.decl = decl;
 	});
 	return backgroundNomalized;
 }
