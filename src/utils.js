@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const url = require('url');
 const path = require('path');
-
+const log = true;
 module.exports = {
     md5Create(stream) {
         const md5 = crypto.createHash('md5');
@@ -48,4 +48,12 @@ module.exports = {
             base = base + '/';
         return url.resolve(base, '.' + urlPath);
     },
+    logger(title) {
+        if(!log) return ;
+        console.log(`-----------------${title}-----------------`);
+        Array.prototype.slice.call(arguments).slice(1).forEach((ct) => {
+            console.log(ct);
+        })
+        console.log('-----------------------------------------');
+    }
 };

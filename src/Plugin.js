@@ -11,6 +11,15 @@ const NAMESPACE = 'CssSpritePlugin';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
 const ReplaceDependency = require('./replaceDependecy');
 const NullFactory = require('webpack/lib/NullFactory');
+const log = true;
+function logger(title) {
+    if(!log) return ;
+    console.log(`-----------------${title}-----------------`);
+    Array.prototype.slice.call(arguments).slice(1).forEach((ct) => {
+        console.log(ct);
+    })
+    console.log('-----------------------------------------');
+}
 
 class ImageSpritePlugin {
     constructor(options) {
@@ -58,6 +67,7 @@ class ImageSpritePlugin {
         this.localImageList = {};
     }
     optimizeTree(callback, compilation) {
+        logger('images', this.images)
         let imagePaths = Object.keys(this.images);
         imagePaths = Array.from(new Set(imagePaths)).sort();
         const images = {};
