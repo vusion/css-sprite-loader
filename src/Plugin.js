@@ -69,11 +69,13 @@ class ImageSpritePlugin {
     optimizeTree(callback, compilation) {
         logger('images', this.images)
         let imagePaths = Object.keys(this.images);
+        /* ???这段在干嘛？？？ */
         imagePaths = Array.from(new Set(imagePaths)).sort();
         const images = {};
         for (const path of imagePaths)
             images[path] = this.images[path];
         this.images = images;
+        /*  */
         const imageList = pickPicture(images, this.options.queryParam);
         const task = [];
         for (const target of Object.keys(imageList)) {
@@ -99,7 +101,13 @@ class ImageSpritePlugin {
                     }
                 });
             }).then((result) => {
-                const coordinates = result.coordinates;
+                logger('Spritesmith', result)
+                const {
+                    coordinates,
+                    properties,
+                    image
+                } = result;
+                //const coordinates = result.coordinates;
                 const assets = compilation.assets;
                 const imagePromises = [];
 
@@ -111,7 +119,8 @@ class ImageSpritePlugin {
                         baseImage = images[baseTarget];
                     image.message = coordinates[image.path];
                     image.message.hash = utils.md5Create(result.image);
-                    imagePromises.push(this.createCss(imageUrl, image, result.properties, image.isRetina, baseImage).then((css) => {
+                    imagePromises.push(
+                        this.createCss(imageUrl, image, properties, baseImage).then((css) => {
                         image.replaceCss = css;
                     }));
                 }
@@ -297,9 +306,15 @@ class ImageSpritePlugin {
             return [...horizonValue, ...verticalValue];
         }
     }
+    /*
+        imageURL: 图片路径
+        image:    图片对象
+        image:    spriteSmith给出的雪碧图大小 width: , height: 
+        baseImage: 
+    */
     createCss(imageUrl, image, properties, isRetina, baseImage) {
-        let { x, y, hash } = image.message;
-        let { width, height } = properties;
+        let { x, y, hash } = image.message; // from spriteSmith
+        let { width, height } = properties; // from spriteSmith
         let result = `.root{ background: url(${imageUrl}?${hash}) no-repeat;}`;
         if (isRetina) {
             const imageWidth = image.message.width;

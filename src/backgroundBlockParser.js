@@ -43,7 +43,7 @@ function resolveBackgroundNode(decl, backgroundNomalized){
 		bgParser.handleInput(node.type, node.value);
 	})
 	//logger('test', test)
-	const nomalizeLine = bgParser.result.reduce((accu, res) => {
+	let nomalizeLine = bgParser.result.reduce((accu, res) => {
 		const ks = Object.keys(res);
 		ks.forEach(k => {
 			if(!accu[k]) accu[k] = '';
@@ -76,14 +76,16 @@ function resolveBackgroundNode(decl, backgroundNomalized){
 		});
 		return accu;
 	}, {});
-
+	nomalizeLine = Object.assign({}, defaultBackground, nomalizeLine)
 	// 暂时还不支持多张背景图片的情况
 	backgroundKeys.forEach(k => {
-		if(nomalizeLine[k]){
+		//if(nomalizeLine[k]){
+			if(k === 'imageSet') return;
 			if(k === 'image'){
 				var reg = BG_IMAGE_SET.exec(nomalizeLine[k]);
 				if(reg){
 					backgroundNomalized.imageSet = reg[1].split(',');
+					//logger('imageSet', reg[1].split(','))
 				}else{
 					backgroundNomalized[k] = nomalizeLine[k];
 				}
@@ -91,9 +93,10 @@ function resolveBackgroundNode(decl, backgroundNomalized){
 				backgroundNomalized[k] = nomalizeLine[k];
 			}
 			
-		}
+		//}
 	});
-	//logger('backgroundNomalized', backgroundNomalized);
+
+	// logger('backgroundNomalized', backgroundNomalized);
 	//logger(decl.prop, val)
 
 }
@@ -129,10 +132,55 @@ function backgroundBlockParser(rule){
 		});
 		if(/^background$/.test(p)) {
 			resolveBackgroundNode(decl, backgroundNomalized);
+			// logger(rule.selector, backgroundNomalized)
 		}
-		backgroundNomalized.decl = decl;
+		//backgroundNomalized.decl = decl;
 	});
+	//logger('backgroundNomalized', backgroundNomalized)
+	backgroundNomalized.ruleRegion = rule;
 	return backgroundNomalized;
 }
 
-module.exports = backgroundBlockParser;
+function openSlotInCSSBlock(parsedRule, slot){
+	const rule = parsedRule.ruleRegion;
+	rule.walkDecls(/^background/, decl => {
+        decl.remove();
+    });
+    rule.append({prop: 'background', value: slot });
+}
+
+function rewriteImageSet(set){
+	return set.reduce((accu, u, i) => (accu += `${i!=0?',':''}${u}`), '');
+}
+
+function rewriteBackgroundDecl(parsedRule){
+	let css = '';
+	let imageSet = ''
+    for(const k in parsedRule){
+        const val = parsedRule[k];
+        
+        if(val){
+        	if(k === 'ruleRegion' || k ==='imageSetSize') continue;
+        	if(!!!val) continue;
+        	// TODO 其他过滤
+			if(k === 'imageSet'){
+				if(val.length === 0) continue;
+				imageSet = `background-image: -webkit-image-set(${rewriteImageSet(val)});`
+				continue;
+			}
+			if(k === 'image'){
+				css += `background-${k}: url(${val});`
+				continue;
+			}
+			css += `background-${k}: ${val};`
+        }
+    }
+    css += imageSet;
+    return css;
+}
+
+module.exports = {
+	backgroundBlockParser,
+	rewriteBackgroundDecl,
+	openSlotInCSSBlock,
+};

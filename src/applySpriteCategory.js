@@ -2,7 +2,7 @@ const logger = require('./utils').logger;
 const BG_URL_REG = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)/i;
 const BG_URL_REG_GROUP = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)\s(\dx)/i;
 
-function analysisBackground(parsedRule, queryParam, defaultName, filter){
+function applySpriteCategory(parsedRule, queryParam, defaultName, filter){
 	const {
 		image,
 		// position,
@@ -29,12 +29,16 @@ function analysisBackground(parsedRule, queryParam, defaultName, filter){
 	    };
 	    promises.push(new Promise((resolve, reject) => {
 	        // This path must be resolved by webpack.
-	        this.resolve(this.context, obj.url, (err, result) => err ? reject(err) : resolve(Object.assign({}, obj, {path: result})));
+
+	        this.resolve(this.context, obj.url, (err, result) => {
+	        	parsedRule.image = `${result}`;
+	        	err ? reject(err) : resolve(Object.assign({}, obj, {path: result}))
+	        });
 	    }))
 	}
 
 	if(imageSet.length !== 0) {
-		imageSet
+		const imageSetMeta = imageSet
 			.map(url => BG_URL_REG_GROUP.exec(url))
 			.map(reg => {
 	            return {
@@ -45,24 +49,31 @@ function analysisBackground(parsedRule, queryParam, defaultName, filter){
 	        .map(obj => {
 	            const parts = obj.url.split("?");
 	            return {
-	                name: `url(\'${obj.url}\')`,
+	                name: `url(${obj.url})`,
 	                url: parts[0],
 	                params: parts[1],
 	                imageSet: true,
 	                group: obj.group,
 	            }
-	        }) 
-	        .forEach(obj => {
-	        	promises.push(new Promise((resolve, reject) => {
-	            	this.resolve(this.context, obj.url, (err, result) => err ? reject(err) : resolve(Object.assign({}, obj, {path: result})));
-	        	}));
 	        });
+
+
+        imageSetMeta.forEach((obj, i) => {
+        	const { group } = obj;
+        	promises.push(new Promise((resolve, reject) => {
+            	this.resolve(this.context, obj.url, (err, result) => {
+            		imageSet[i] = `${result} ${group}`;
+            		//logger(i, imageSet[i]);
+            		err ? reject(err) : resolve(Object.assign({}, obj, {path: result}))
+            	});
+        	}));
+        });
 	}
 	return Promise.all(promises).then(arr => {
 		return arr.map(img => {
-			logger('img', img)
 			const {name, url, params, group, path, imageSet} = img;
 			const result = {name, url, path, imageSet};
+			if(group) result.group = group;
 			let needMerge = false;
 			if (params) {
 				const paramsAst = params.split('&');
@@ -82,15 +93,14 @@ function analysisBackground(parsedRule, queryParam, defaultName, filter){
 	            if (spriteMerge === undefined)
 	                result[queryParam] = defaultName;
 	            if(imageSet)
-	            	result[queryParam] = applyRetina(result[queryParam], group)
+	            	result[queryParam] = applyImageSet(result[queryParam], group)
 			}
 			result.merge = needMerge;
-			logger('result', result)
 			return result;
 		})
 	})
 
 }
-function applyRetina(name, group){return `${name}${group === '1x'?'':`@${group}`}`};
+function applyImageSet(name, group){return `${name}${group === '1x'?'':`@${group}`}`};
 
-module.exports = analysisBackground;
+module.exports = applySpriteCategory;

@@ -26,10 +26,10 @@ const IMAGE_REPEAT = /^\b(repeat\-x|repeat\-y|repeat|space|round|no\-repeat)\b$/
 const IMAGE_ATTACHMENT = /^\b(scroll|fixed|local)\b$/;
 const IMAGE_BOX = /^\b(border\-box|padding\-box|content\-box)\b$/;
 
-const NUMBER = /\b\d+(?:\.\d+)?(cap|ch|em|ex|ic|lh|rem|rlh|vh|vw|vi|vb|vmin|vmax|px|cm|mm|Q|in|pc|pt)\b/;
-const PERCENTAGE = /^(\d+(?:\.\d+)?%)$/;
+const NUMBER = /\b\-?\d+(?:\.\d+)?(cap|ch|em|ex|ic|lh|rem|rlh|vh|vw|vi|vb|vmin|vmax|px|cm|mm|Q|in|pc|pt)\b/;
+const PERCENTAGE = /^(\-?\d+(?:\.\d+)?%)$/;
 // TODO 目前无法匹配到 .55px这样的写法，同时无法把百分比放入正则
-const IMAGE_POSITION = /^\b(auto|left|center|right|top|bottom|0|(?:\b\d*(?:\.\d+)?(cap|ch|em|ex|ic|lh|rem|rlh|vh|vw|vi|vb|vmin|vmax|px|cm|mm|Q|in|pc|pt)\b))\b$/;
+const IMAGE_POSITION = /^\b(auto|left|center|right|top|bottom|0)\b$/;
 
 const NAMED_COLOR = /\b(black|silver|gray|white|maroon|red|purple|fuchsia|green|lime|olive|yellow|navy|blue|teal|aqua|orange|aliceblue|antiquewhite|aquamarine|azure|beige|bisque|blanchedalmond|blueviolet|brown|burlywood|cadetblue|chartreuse|chocolate|coral|cornflowerblue|cornsilk|crimson|cyan|aqua|darkblue|darkcyan|darkgoldenrod|darkgray|darkgreen|darkgrey|darkkhaki|darkmagenta|darkolivegreen|darkorange|darkorchid|darkred|darksalmon|darkseagreen|darkslateblue|darkslategray|darkslategrey|darkturquoise|darkviolet|deeppink|deepskyblue|dimgray|dimgrey|dodgerblue|firebrick|floralwhite|forestgreen|gainsboro|ghostwhite|gold|goldenrod|greenyellow|grey|honeydew|hotpink|indianred|indigo|ivory|khaki|lavender|lavenderblush|lawngreen|lemonchiffon|lightblue|lightcoral|lightcyan|lightgoldenrodyellow|lightgray|lightgreen|lightgrey|lightpink|lightsalmon|lightseagreen|lightskyblue|lightslategray|lightslategrey|lightsteelblue|lightyellow|limegreen|linen|magenta|fuchsia|mediumaquamarine|mediumblue|mediumorchid|mediumpurple|mediumseagreen|mediumslateblue|mediumspringgreen|mediumturquoise|mediumvioletred|midnightblue|mintcream|mistyrose|moccasin|navajowhite|oldlace|olivedrab|orangered|orchid|palegoldenrod|palegreen|paleturquoise|palevioletred|papayawhip|peachpuff|peru|pink|plum|powderblue|rosybrown|royalblue|saddlebrown|salmon|sandybrown|seagreen|seashell|sienna|skyblue|slateblue|slategray|slategrey|snow|springgreen|steelblue|tan|thistle|tomato|turquoise|violet|wheat|whitesmoke|yellowgreen|rebeccapurple)\b/
 const COLOR = /^rbg|rbga|hsl|hsla|#/i
@@ -200,7 +200,7 @@ class ImagePositionState extends parserState{
 	}
 	handleInput(parser, type, value){
 		logger('ImagePositionState', type, value)
-		if(IMAGE_POSITION.test(value) || PERCENTAGE.test(value)){
+		if(NUMBER.test(value) || IMAGE_POSITION.test(value) || PERCENTAGE.test(value)){
 			this.update(parser, value);
 			this.oops = false;
 			this.counting += 1;
