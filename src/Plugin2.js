@@ -14,15 +14,6 @@ const SpriteSmithWrapper = require('./applySpriteSmith');
 const CSS_RULE = /cssRule\-([^;]+);/g
 const PADDING = 0;
 
-const log = false;
-function logger(title) {
-    if(!log) return ;
-    console.log(`-----------------${title}-----------------`);
-    Array.prototype.slice.call(arguments).slice(1).forEach((ct) => {
-        console.log(ct);
-    })
-    console.log('-----------------------------------------');
-}
 class ImageSpritePlugin {
 	constructor(options) {
         this.options = Object.assign({
@@ -71,22 +62,17 @@ class ImageSpritePlugin {
         //this.localImageList = {};
     }
     optimizeTree(callback, compilation){
-    	logger('cssBlockList', this.cssBlockList)
     	Promise.all(this.spriteSmith.apply(this.cssBlockList, compilation))
     		.then(() => {
     			callback();
     		});
     }
     optimizeExtractedChunks(chunks){
-    	logger('optimizeExtractedChunks');
     }
     optimizeChunkAssets(chunks, callback, compilation){
-    	logger('optimizeChunkAssets');
-
     	callback();
     }
     afterOptimizeTree(compilation){
-    	logger('afterOptimizeTree');
     	const allModules = getAllModules(compilation);
 
         allModules.forEach(module => {
@@ -117,7 +103,7 @@ class ImageSpritePlugin {
     	let arr;
     	// source.replaceReg()
     	while((arr = CSS_RULE.exec(source)) !== null){
-    		logger(arr[1], arr);
+
     	}
     }
 

@@ -78,7 +78,9 @@ class SpriteSmithWrapper{
                             if(block.parsedRule && !cssBlockLock[blockhash]){
                                 cssBlockLock[blockhash] = true;
                                 logger('cssblock', block.parsedRule.image)
-                                const { divWidth, divHeight } = block;
+                                let { divWidth, divHeight } = block;
+                                divWidth = utils.unit2Number(divWidth);
+                                divHeight = utils.unit2Number(divHeight);
                                 let { size, position, imageSet } = block.parsedRule;
                                 logger('origin', size , position, divWidth, divHeight)
                                 if(!size) {
@@ -101,6 +103,23 @@ class SpriteSmithWrapper{
                                     }
 
                                      
+                                }else if(/cover/.test(size)){
+                                    const rx = divWidth / spriteMeta.width;
+                                    const ry = divHeight / spriteMeta.height;
+                                    if(rx > ry){
+                                        size = [divWidth, spriteMeta.height * rx]
+                                    }else{
+                                        size = [spriteMeta.width * ry, divHeight]
+                                    }
+
+                                }else if(/contain/.test(size)){
+                                    const rx = divWidth / spriteMeta.width;
+                                    const ry = divHeight / spriteMeta.height;
+                                    if(rx > ry){
+                                        size = [spriteMeta.width * ry, divHeight]
+                                    }else{
+                                        size = [divWidth, spriteMeta.height * rx]
+                                    }
                                 }else{
                                     size = utils.str2NumArray(size, divWidth, divHeight);   
                                 }
