@@ -1,14 +1,15 @@
 const CSSSpritePlugin = require('../../../index').Plugin;
-
+console.log(__dirname);
 module.exports = {
     entry: {
         bundle: './index.js',
     },
     output: {
-        path: __dirname + '/dest',
+        path: __dirname + '/',
         filename: '[name].js',
-        publicPath: 'dest/',
+        publicPath: '/',
     },
+    context: __dirname,
     module: {
         rules: [
             { test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../../../index')] },

@@ -154,6 +154,7 @@ function rewriteImageSet(set){
 }
 
 function rewriteBackgroundDecl(parsedRule){
+	if(!parsedRule) return '';
 	let css = '';
 	let imageSet = ''
     for(const k in parsedRule){

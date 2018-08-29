@@ -17,7 +17,7 @@ function fetchPropFrom(meta) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   const server = await new Promise((res, rej) => {
-  	const compiler = webpack(require('./webpack.config.js'));
+  	const compiler = webpack(require('./webpack.config.test.js'));
   	const server = new webpackDevServer(compiler, {  
         contentBase: __dirname + '/',
         compress: true,
@@ -63,12 +63,14 @@ function fetchPropFrom(meta) {
           let source = document.querySelector(contrastSelector);
           let sprite = document.querySelector(experimentsSelector);
           console.log(source, sprite)
+          if(!source || !sprite ) return false;
+          
           return {
             name:    exp,
             source:  JSON.stringify(source.getBoundingClientRect()),
             sprite:  JSON.stringify(sprite.getBoundingClientRect()),
           }
-        });
+        }).filter(Boolean);
     });
 
     // normalize meta
@@ -93,6 +95,8 @@ function fetchPropFrom(meta) {
 
     const rslt = experimentsList.map((experiment) => {
       const {sprite, source, name} = experiment;
+      console.log(sprite, source, name);
+      if(source.height === 0 || sprite.height === 0) return {code: 999, msg: '元素未渲染', errCSSBlock: name};
       if(sprite.height !== source.height || sprite.top !== source.top) return {code: 606, msg: '页面元素未对应', errCSSBlock: name}
       const sourcePart = grey.crop({x: 0, y: source.top, width: width/2, height: source.height});
       const spritePart = grey.crop({x: width/2, y: sprite.top, width: width/2, height: sprite.height});
@@ -106,8 +110,11 @@ function fetchPropFrom(meta) {
         }
       }else{
         let len = leftPartArray.length - 1;
-        while(len-- && leftPartArray[len][0] === rigthPartArray[len][0]){};
-        
+        while(len-- && Math.abs(leftPartArray[len][0] - rigthPartArray[len][0]) < 10){};
+        console.log(
+          len,
+          leftPartArray[len], 
+          rigthPartArray[len])
         if(len === -1){
           return {
             code: 200,
@@ -117,7 +124,7 @@ function fetchPropFrom(meta) {
         }else{
           return {
             code: 996,
-            msg: '校验失败',
+            msg: `校验失败 @ ${len}`,
             errCSSBlock: name
           }
         }

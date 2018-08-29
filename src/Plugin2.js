@@ -111,14 +111,16 @@ class ImageSpritePlugin {
     	const blocks = this.cssBlockList;
     	const rangeList = [];
     	let arr;
+
     	// source.replaceReg()
     	while((arr = CSS_RULE.exec(source)) !== null){
     		const [matched, hash] = arr;
     		const index = arr.index;
     		// console.log(matched.substring(0, matched.length-1), hash, index);
     		const block = blocks[matched.substring(0, matched.length-1)];
-    		const css = rewriteBackgroundDecl(block.parsedRule);
-    		rangeList.push([index - 12, index + matched.length -1, css]);
+            const css = rewriteBackgroundDecl(block.parsedRule);
+            rangeList.push([index - 12, index + matched.length -1, css]);
+
     	}
     	return rangeList;
     }
