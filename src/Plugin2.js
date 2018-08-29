@@ -12,6 +12,7 @@ const {
 const utils = require('./utils')
 const SpriteSmithWrapper = require('./applySpriteSmith');
 const CSS_RULE = /cssRule\-([^;]+);/g
+const MEDIAQ_RULE = /mediaQ\-([^;]+);/g
 const PADDING = 0;
 
 class ImageSpritePlugin {
@@ -37,6 +38,7 @@ class ImageSpritePlugin {
                 compilation.hooks.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.optimizeChunkAssets(chunks, callback, compilation));
             });
             compiler.hooks.compilation.tap(NAMESPACE, (compilation, params) => {
+                compilation.hooks.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.attachMediaQuery(chunks, callback))
                 compilation.hooks.normalModuleLoader.tap(NAMESPACE, (loaderContext) => this.normalModuleLoader(loaderContext));
             });
     	}else {
@@ -52,16 +54,18 @@ class ImageSpritePlugin {
             });
 
             compiler.plugin('compilation', (compilation, params) => {
+                // compilation.plugin.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.attachMediaQuery(chunks, callback))
                 compilation.plugin('normal-module-loader', (loaderContext) => this.normalModuleLoader(loaderContext));
             });
         }
     }
     afterPlugins() {
-        this.images = {};
+        //this.images = {};
         this.cssBlockList = {};
         //this.localImageList = {};
     }
     optimizeTree(callback, compilation){
+        utils.logger('cssBlockList', this.cssBlockList)
     	Promise.all(this.spriteSmith.apply(this.cssBlockList, compilation))
     		.then(() => {
     			callback();
@@ -70,7 +74,17 @@ class ImageSpritePlugin {
     optimizeExtractedChunks(chunks){
     }
     optimizeChunkAssets(chunks, callback, compilation){
-    	callback();
+        // chunks.forEach(chunk => {
+        //     const r = chunk.mapModules(m => /\.css$/.test(m.request) && m).filter(Boolean)
+        //     r.forEach(n => console.log(n._source));
+        //     // chunk.files.forEach(file => {
+        //     //     console.log(file);
+        //     //     // if(/\.css/.test(file)){
+        //     //     //     console.log(file);
+        //     //     // }
+        //     // }); 
+        // });   	
+        callback();
     }
     afterOptimizeTree(compilation){
     	const allModules = getAllModules(compilation);
@@ -92,6 +106,18 @@ class ImageSpritePlugin {
                 }
             }
         }) 
+    }
+
+    attachMediaQuery(chunks, callback){
+        console.log('attachMediaQuery')
+        chunks.forEach(chunk => {
+            console.log({
+              id: chunk.id,
+              name: chunk.name,
+              includes: chunk.modules.map(module => module.request)
+            });
+          });
+        callback();
     }
 
     normalModuleLoader(loaderContext) {
@@ -122,6 +148,12 @@ class ImageSpritePlugin {
             rangeList.push([index - 12, index + matched.length -1, css]);
 
     	}
+
+        while((arr = MEDIAQ_RULE.exec(source)) !== null){
+            const [matched, hash] = arr; 
+            const block = blocks[matched.substring(0, matched.length-1)];
+
+        }
     	return rangeList;
     }
 }

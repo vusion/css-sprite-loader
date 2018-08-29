@@ -24,7 +24,7 @@ function generateHashFromRule(rule){
     rule.walk((dec) => {
         blockString += (dec.prop + ':' + dec.value + ';');
     });
-   	return 'cssRule-' + utils.md5Create(blockString);
+   	return utils.md5Create(blockString);
 }
 
 function addCSSBlockToList(parsedRule, images, cssBlockList, openSlotInCSSBlock){
@@ -36,11 +36,19 @@ function addCSSBlockToList(parsedRule, images, cssBlockList, openSlotInCSSBlock)
 		const block = {};
 		block.parsedRule = parsedRule;
 		// 此CSS block的哈希值
-		block.hash = hash;
+        const uniqueHash = `cssRule-${hash}`;
+		block.hash = uniqueHash;
+        if(parsedRule.imageSetMeta){
+            block.hashMediaQ = parsedRule.imageSetMeta.reduce((accu, meta) => { 
+                accu[meta.group] = `mediaQ${meta.group}-${hash}`;
+                return accu;
+            }, {})        
+        }
+
 		checkDivWidthHeight(parsedRule, block);
 		block.images = images;
-		cssBlockList[hash] = block;
-		openSlotInCSSBlock(parsedRule, hash);
+		cssBlockList[uniqueHash] = block;
+		openSlotInCSSBlock(parsedRule, uniqueHash);
 	}
 }
 

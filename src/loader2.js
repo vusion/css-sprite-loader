@@ -14,9 +14,8 @@ const {
 } = require('./backgroundBlockParser');
 const applySpriteCategory = require('./applySpriteCategory');
 const {
-    addImageToList, 
     addCSSBlockToList, 
-} = require('./addImageToList');
+} = require('./addCSSBlockToList');
 
 let queryParam = 'sprite';
 let defaultName = 'sprite';
@@ -29,6 +28,10 @@ function getNextLoader(loader) {
     const index = loaderContexts.lastIndexOf(false);
     const nextLoader = loaders[index].normal;
     return nextLoader;
+}
+
+function mediaQuery(retinaNumber){
+    return `@media (-webkit-min-device-pixel-ratio: ${retinaNumber}),(min-resolution: ${retinaNumber}dppx){}`
 }
 
 function ImageSpriteLoader(source) {
@@ -45,14 +48,15 @@ function ImageSpriteLoader(source) {
     const promises = [];
 	const ast = typeof source === 'string' ? css.parse(source) : source;
 	const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
+    let needMediaQuery = false;
+    const mediaQ = {};
 
 	ast.walkRules((rule) => {
         const parsedRule = backgroundBlockParser(rule);
-        
+        if(parsedRule.imageSet.length > 0) needMediaQuery = true;
         const UsingThisLoader = !!parsedRule.image || parsedRule.imageSet.length !== 0;
         if(UsingThisLoader) {
             promises.push(applySpriteCategory.call(this, parsedRule, queryParam, defaultName, filter).then((images) => {
-                
                 logger('images', images)
                 addCSSBlockToList(parsedRule, images, cssBlockList, openSlotInCSSBlock);
             }));
@@ -61,6 +65,34 @@ function ImageSpriteLoader(source) {
     });
 
     Promise.all(promises).then(() => {
+        if(needMediaQuery){ 
+            Object.keys(cssBlockList).forEach(k => {
+                const { 
+                    parsedRule,
+                    hashMediaQ,
+                } = cssBlockList[k];
+
+                if(parsedRule.imageSet.length > 0){
+                    parsedRule.imageSet.forEach(m => {
+                        let retinaNumber = /(\dx)/.exec(m.split(' ')[1])[1];
+                        if(!mediaQ[retinaNumber])
+                            mediaQ[retinaNumber] = [];
+
+                        mediaQ[retinaNumber].push({parsedRule, hashMediaQ});
+                    })
+                }
+            });
+
+            Object.keys(mediaQ).forEach(retinaNumber => {
+                ast.append(mediaQuery(retinaNumber));
+                const node = ast.nodes[ast.nodes.length - 1];
+                mediaQ[retinaNumber].forEach(q => {
+                    node.append(`${q.parsedRule.selector}{background:${q.hashMediaQ[retinaNumber]};}`) 
+                })          
+            })
+        }
+
+
         let cssStr = '';
         if (!acceptPostCssAst) {
             css.stringify(ast, (str) => {

@@ -130,7 +130,7 @@ body {
     background-image: url('../../images/lollipop.png?sprite');
     background-size: contain;
 }
-/*
+
 .source.bg-size-override {
     width: 100px;
     height: 150px;
@@ -207,9 +207,9 @@ body {
     background: url('../../images/html.png?sprite');
     background-size: 200px 100px;
     background-position: 60px -40px;
-}*/
+}
 
-/*.source.without-image-set {
+.source.without-image-set {
     width: 128px;
     height: 128px;
     background: url('../../images/retina/angry-birds.png');
@@ -230,8 +230,8 @@ body {
     height: 128px;
     background: -webkit-image-set(url('../../images/retina/angry-birds.png?sprite') 1x, url('../../images/retina/angry-birds@2x.png?sprite') 2x);
 }
-*/
-/*.source.image-set-fallback {
+
+.source.image-set-fallback {
     width: 128px;
     height: 128px;
     background: url('../../images/retina/angry-birds.png');
@@ -272,4 +272,4 @@ body {
     height: 128px;
     background: url('../../images/retina/captain-america.png?sprite');
     background: -webkit-image-set(url('../../images/retina/captain-america.png?sprite') 1x, url('../../images/retina/captain-america@2x.png?sprite') 2x);
-}*/
+}

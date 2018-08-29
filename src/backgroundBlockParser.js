@@ -18,6 +18,7 @@ const logger = require('./utils').logger;
 const BG_IMAGE_SET = /(?:\-webkit\-)?image-set\((.+x)\)/;
 
 const defaultBackground = {
+	selector: '',
 	image: '',
 	position: '',
 	size: '',
@@ -101,6 +102,15 @@ function resolveBackgroundNode(decl, backgroundNomalized){
 
 }
 
+function resolveImageSet(arr){
+	return arr.reduce((accu, m) => {
+		const [url, num] = m.split(' ');
+		const retinaNumber = /(\d)x/.exec(num)[1];
+		accu[retinaNumber] = url;
+		return accu;
+	}, {})
+}
+
 function reWriteImageset(sets){
 	return `-webkit-image-set(${sets.join(',')})`
 }
@@ -115,6 +125,8 @@ function joinParam(param) {
 
 function backgroundBlockParser(rule){
 	const backgroundNomalized = Object.assign({}, defaultBackground);
+	
+	logger('rule', rule.selector)
 	rule.walkDecls(/^background/, decl => {
 		const p = decl.prop;
 		//logger(p, decl.value);
@@ -138,6 +150,7 @@ function backgroundBlockParser(rule){
 	});
 	//logger('backgroundNomalized', backgroundNomalized)
 	backgroundNomalized.ruleRegion = rule;
+	backgroundNomalized.selector = rule.selector;
 	return backgroundNomalized;
 }
 
@@ -161,12 +174,12 @@ function rewriteBackgroundDecl(parsedRule){
         const val = parsedRule[k];
         
         if(val){
-        	if(k === 'ruleRegion' || k ==='imageSetSize') continue;
+        	if(k === 'ruleRegion' || k ==='imageSetSize' || k === 'imageSetMeta' || k === 'selector') continue;
         	if(!!!val) continue;
         	// TODO 其他过滤
 			if(k === 'imageSet'){
-				if(val.length === 0) continue;
-				imageSet = `background-image: -webkit-image-set(${rewriteImageSet(val)});`
+				// if(val.length === 0) continue;
+				// imageSet = `background-image: -webkit-image-set(${rewriteImageSet(val)});`
 				continue;
 			}
 			if(k === 'image'){
@@ -178,6 +191,25 @@ function rewriteBackgroundDecl(parsedRule){
     }
     css += imageSet;
     return css;
+}
+
+function rewriteBackgroundMediaQuery(parsedRule){
+	if(!parsedRule) return '';
+	let css = '';
+	let imageSet = ''
+ 	for(const k in parsedRule){
+        const val = parsedRule[k];
+        
+        if(val){
+			if(k === 'imageSet'){
+				// if(val.length === 0) continue;
+				// imageSet = `background-image: -webkit-image-set(${rewriteImageSet(val)});`
+				continue;
+			}
+        }
+    }
+    css += imageSet;
+    return css;	
 }
 
 module.exports = {

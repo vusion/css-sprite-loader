@@ -77,12 +77,12 @@ class SpriteSmithWrapper{
 
                             if(block.parsedRule && !cssBlockLock[blockhash]){
                                 cssBlockLock[blockhash] = true;
-                                logger('cssblock', block.parsedRule.image)
+                                // logger('cssblock', block.parsedRule.image)
                                 let { divWidth, divHeight } = block;
                                 divWidth = utils.unit2Number(divWidth);
                                 divHeight = utils.unit2Number(divHeight);
                                 let { size, position, imageSet } = block.parsedRule;
-                                logger('origin', size , position, divWidth, divHeight)
+                                // logger('origin', size , position, divWidth, divHeight)
                                 if(!size) {
                                     size = [spriteMeta.width, spriteMeta.height];
                                 }else if(/auto/.test(size)){

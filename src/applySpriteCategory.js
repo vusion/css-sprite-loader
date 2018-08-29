@@ -68,6 +68,8 @@ function applySpriteCategory(parsedRule, queryParam, defaultName, filter){
             	});
         	}));
         });
+
+        parsedRule.imageSetMeta = imageSetMeta;
 	}
 	return Promise.all(promises).then(arr => {
 		return arr.map(img => {
