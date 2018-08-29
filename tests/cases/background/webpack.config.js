@@ -5,9 +5,9 @@ module.exports = {
         bundle: './index.js',
     },
     output: {
-        path: __dirname + '/dest',
+        path: __dirname + '/',
         filename: '[name].js',
-        publicPath: 'dest/',
+        publicPath: '/',
     },
     module: {
         rules: [
