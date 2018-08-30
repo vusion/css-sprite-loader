@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const url = require('url');
 const path = require('path');
-const log = true;
+const log = false;
 module.exports = {
     md5Create(stream) {
         const md5 = crypto.createHash('md5');

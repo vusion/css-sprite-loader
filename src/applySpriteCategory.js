@@ -1,6 +1,9 @@
+const fs = require('fs');
+const path = require('path');
 const logger = require('./utils').logger;
 const BG_URL_REG = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)/i;
 const BG_URL_REG_GROUP = /url\([\s"']*(.+\.(png|jpg|jpeg|gif)([^\s"']*))[\s"']*\)\s(\dx)/i;
+const retinaMark = 'retina';
 
 function applySpriteCategory(parsedRule, queryParam, defaultName, filter){
 	const {
@@ -72,8 +75,9 @@ function applySpriteCategory(parsedRule, queryParam, defaultName, filter){
         parsedRule.imageSetMeta = imageSetMeta;
 	}
 	return Promise.all(promises).then(arr => {
-		return arr.map(img => {
+		const images = arr.map(img => {
 			const {name, url, params, group, path, imageSet} = img;
+			const retinaFallbackResults = [];
 			const result = {name, url, path, imageSet};
 			if(group) result.group = group;
 			let needMerge = false;
@@ -89,7 +93,35 @@ function applySpriteCategory(parsedRule, queryParam, defaultName, filter){
                     else if (filter instanceof RegExp)
                         needMerge = filter.test(url);
 
-                    result[param[0]] = param[1];
+                    if(!/retina/.test(param[0])){
+                    	result[param[0]] = param[1];
+                    }
+                    
+
+                    if (isRetinaMark(param[0])) {
+	                    //result.retinas.push(param[0]);
+	                    if (!param[1])
+	                        param[1] = getRetinaPath(path, param[0]);
+	                    
+	                    const img = {
+	                    	path: param[1],
+	                    	imageSet: true,
+	              			merge: true,
+	                    };
+	                    img[queryParam] = param[0];
+            			retinaFallbackResults.push(img);
+
+            			if(!parsedRule.imageSetMeta) parsedRule.imageSetMeta = [];
+            			const group = getRetinaGroup(param[0]);
+            			parsedRule.imageSetMeta.push({
+            				imageSet: true,
+	                		group,
+            			});
+            			// logger('parsedRule', parsedRule.selector, parsedRule.imageSet)
+            			parsedRule.imageSet.push(`${img.path} ${group}`)
+
+	                    //logger('retina', param[0], param[1]);
+	                }
             	});
             	const spriteMerge = result[queryParam];
 	            if (spriteMerge === undefined)
@@ -98,11 +130,50 @@ function applySpriteCategory(parsedRule, queryParam, defaultName, filter){
 	            	result[queryParam] = applyImageSet(result[queryParam], group)
 			}
 			result.merge = needMerge;
+
+			if(retinaFallbackResults.length > 0) {
+				retinaFallbackResults.push(result);
+				//logger('retinaFallbackResults', retinaFallbackResults);
+				return retinaFallbackResults;
+			}
 			return result;
-		})
+		}).reduce((accu, curr) => {
+			if(Array.isArray(curr)){
+				accu = accu.concat(curr);
+			}else{
+				accu.push(curr);
+			}
+			return accu;
+		}, []);
+
+		return {
+			images,
+			parsedRule,
+		}
 	})
 
 }
 function applyImageSet(name, group){return `${name}${group === '1x'?'':`@${group}`}`};
-
+function isRetinaMark(name) {
+    // if options' name start with 'retina'
+    return name.substr(0, retinaMark.length) === retinaMark;
+}
+function getRetinaPath(filePath, name) {
+    const retinaNumber = getRetinaNumber(name);
+    const extname = path.extname(filePath);
+    let baseName = path.basename(filePath, extname);
+    const dirname = path.dirname(filePath);
+    baseName = `${baseName}@${retinaNumber}x${extname}`;
+    return path.join(dirname, baseName);
+}
+function getRetinaGroup(param){
+	let group = /retina(\dx)?/.exec(param)[1];
+	if(!group) group = '2x';
+	return group;
+}
+function getRetinaNumber(name) {
+    if (name === retinaMark)
+        return 2;
+    return parseInt(name.substring(retinaMark.length, name.length - 1));
+}
 module.exports = applySpriteCategory;

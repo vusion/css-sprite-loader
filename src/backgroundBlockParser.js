@@ -27,7 +27,7 @@ const defaultBackground = {
 	clip: '',
 	origin: '',
 	color: '',
-	imageSet: [],
+	//imageSet: [],
 }
 const backgroundKeys = Object.keys(defaultBackground);
 
@@ -125,8 +125,8 @@ function joinParam(param) {
 
 function backgroundBlockParser(rule){
 	const backgroundNomalized = Object.assign({}, defaultBackground);
-	
-	logger('rule', rule.selector)
+	backgroundNomalized.imageSet = [];
+	//logger('rule', rule.selector)
 	rule.walkDecls(/^background/, decl => {
 		const p = decl.prop;
 		//logger(p, decl.value);
@@ -166,54 +166,43 @@ function rewriteImageSet(set){
 	return set.reduce((accu, u, i) => (accu += `${i!=0?',':''}${u}`), '');
 }
 
+const backgroundProp = [ 'image','position', 'size', 'repeat', 'attachment','clip', 'origin', 'color']
 function rewriteBackgroundDecl(parsedRule){
 	if(!parsedRule) return '';
 	let css = '';
 	let imageSet = ''
-    for(const k in parsedRule){
-        const val = parsedRule[k];
-        
-        if(val){
-        	if(k === 'ruleRegion' || k ==='imageSetSize' || k === 'imageSetMeta' || k === 'selector') continue;
-        	if(!!!val) continue;
-        	// TODO 其他过滤
-			if(k === 'imageSet'){
-				// if(val.length === 0) continue;
-				// imageSet = `background-image: -webkit-image-set(${rewriteImageSet(val)});`
-				continue;
-			}
+	backgroundProp.forEach(k => {
+		const val = parsedRule[k];
+		if(val){
 			if(k === 'image'){
 				css += `background-${k}: url(${val});`
-				continue;
-			}
-			css += `background-${k}: ${val};`
-        }
-    }
-    css += imageSet;
+			}else{
+				css += `background-${k}: ${val};`
+			}			
+		}
+
+	})
     return css;
 }
 
-function rewriteBackgroundMediaQuery(parsedRule){
+function rewriteBackgroundMediaQuery(parsedRule, group){
 	if(!parsedRule) return '';
 	let css = '';
-	let imageSet = ''
- 	for(const k in parsedRule){
-        const val = parsedRule[k];
-        
-        if(val){
-			if(k === 'imageSet'){
-				// if(val.length === 0) continue;
-				// imageSet = `background-image: -webkit-image-set(${rewriteImageSet(val)});`
-				continue;
-			}
-        }
-    }
-    css += imageSet;
+
+	const set = parsedRule.imageSet.filter(i => i.mediaQ === group)[0];
+	const {
+		image,
+        mediaQ,
+        size,
+        position,
+	} = set;	
+	css += `background-image:${image};background-size:${size};background-position:${position};`;
     return css;	
 }
 
 module.exports = {
 	backgroundBlockParser,
 	rewriteBackgroundDecl,
+	rewriteBackgroundMediaQuery,
 	openSlotInCSSBlock,
 };
