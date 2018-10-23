@@ -10,43 +10,43 @@ body {
 .source.simple {
     width: 128px;
     height: 128px;
-    background: url('../../images/home.png');
+    background: url('../../fixtures/images/home.png');
 }
 .sprite.simple {
     width: 128px;
     height: 128px;
-    background: url('../../images/home.png?sprite');
+    background: url('../../fixtures/images/home.png?sprite');
 }
 
 .source.query {
     width: 128px;
     height: 128px;
-    background: url('../../images/lollipop.png');
+    background: url('../../fixtures/images/lollipop.png');
 }
 .sprite.query {
     width: 128px;
     height: 128px;
-    background: url('../../images/lollipop.png?sprite=sprite');
+    background: url('../../fixtures/images/lollipop.png?sprite=sprite');
 }
 
 .source.rename {
     width: 128px;
     height: 128px;
-    background: url('../../images/tag.png');
+    background: url('../../fixtures/images/tag.png');
 }
 .sprite.rename {
     width: 128px;
     height: 128px;
-    background: url('../../images/tag.png?sprite=sprite-nav');
+    background: url('../../fixtures/images/tag.png?sprite=sprite-nav');
 }
 
 .source.rename-2 {
     width: 128px;
     height: 128px;
-    background: url('../../images/html.png');
+    background: url('../../fixtures/images/html.png');
 }
 .sprite.rename-2 {
     width: 128px;
     height: 128px;
-    background: url('../../images/html.png?sprite=sprite-nav');
+    background: url('../../fixtures/images/html.png?sprite=sprite-nav');
 }
