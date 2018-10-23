@@ -8,8 +8,8 @@
   ],
   "scripts": {
     "precommit": "bash node_modules/vusion-hooks/pre-commit",
-    "test": "mocha --timeout 5000 ./tests/final.test.js",
-    "testnode": "node ./tests/final.test.js",
+    "test": "mocha --timeout 5000 ./test/final.test.js",
+    "testnode": "node ./test/final.test.js",
     "eslint": "eslint ./src --fix"
   },
   "main": "./index.js",

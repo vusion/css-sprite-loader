@@ -8,9 +8,9 @@ const execa = require('execa');
 const value = 'default';
 const replaceReg = /REPLACE_BACKGROUND\([^)]*\)/g;
 
-describe('Webpack Integration Tests', () => {
+describe('Webpack Integration test', () => {
     const buildCLI = path.resolve(__dirname, '../node_modules/.bin/webpack');
-    const runDir = path.join('../tests/fixtures/' + value);
+    const runDir = path.join('../test/fixtures/' + value);
     const outputDirectory = path.join('./fixtures/' + value + '/dest');
     before(() => {
         shell.cd(path.resolve(__dirname, runDir));

@@ -4,10 +4,10 @@ const webpack = require('webpack');
 
 const testCase = ['retina', 'default'];
 
-describe('Webpack Integration Tests', () => {
+describe('Webpack Integration test', () => {
     testCase.forEach((value) => {
         it('#test webpack integration case: ' + value, (done) => {
-            const configPath = path.join('../tests/fixtures/', value, '/webpack.config.js');
+            const configPath = path.join('../test/fixtures/', value, '/webpack.config.js');
             const outputDirectory = path.join('/fixtures/', value, '/dest');
             const options = require(configPath);
             for (const chunk of Object.keys(options.entry))
