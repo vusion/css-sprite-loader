@@ -1,26 +1,21 @@
 'use strict';
 
-const css = require('postcss');
-const fs = require('fs');
-const plugin = require('./Plugin');
+const postcss = require('postcss');
+const Plugin = require('./Plugin');
 
-const utils = require('./utils');
-const logger = utils.logger;
-
-const { 
-    backgroundBlockParser, 
-    rewriteBackgroundDecl, 
-    openSlotInCSSBlock 
+const {
+    backgroundBlockParser,
+    rewriteBackgroundDecl,
+    openSlotInCSSBlock,
 } = require('./backgroundBlockParser');
 const applySpriteCategory = require('./applySpriteCategory');
 const {
-    addCSSBlockToList, 
+    addCSSBlockToList,
 } = require('./addCSSBlockToList');
 
 let queryParam = 'sprite';
 let defaultName = 'sprite';
 let filter = 'query';
-
 
 function getNextLoader(loader) {
     const loaders = loader.loaders;
@@ -30,86 +25,80 @@ function getNextLoader(loader) {
     return nextLoader;
 }
 
-function mediaQuery(retinaNumber){
-    return `@media (-webkit-min-device-pixel-ratio: ${retinaNumber}),(min-resolution: ${retinaNumber}dppx){}`
+function mediaQuery(retinaNumber) {
+    return `@media (-webkit-min-device-pixel-ratio: ${retinaNumber}),(min-resolution: ${retinaNumber}dppx){}`;
 }
 
-function ImageSpriteLoader(source) {
+function cssSpriteLoader(source) {
     const callback = this.async();
-	const ImageSpritePlugin = this.ImageSpritePlugin;
+    const CSSSpritePlugin = this.CSSSpritePlugin;
 
-    const cssBlockList   = ImageSpritePlugin.cssBlockList;
-	queryParam           = ImageSpritePlugin.options.queryParam;
-    defaultName          = ImageSpritePlugin.options.defaultName;
-    filter               = ImageSpritePlugin.options.filter;
+    const cssBlockList = CSSSpritePlugin.cssBlockList;
+    queryParam = CSSSpritePlugin.options.queryParam;
+    defaultName = CSSSpritePlugin.options.defaultName;
+    filter = CSSSpritePlugin.options.filter;
 
-    
-    const smithImageMergeSet = {};
     const promises = [];
-	const ast = typeof source === 'string' ? css.parse(source) : source;
-	const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
+    // 为了提高性能，这种方案只需解析一次 PostCSS
+    const ast = typeof source === 'string' ? postcss.parse(source) : source;
+    const acceptPostCssAst = !!getNextLoader(this).acceptPostCssAst;
     let needMediaQuery = false;
     const mediaQ = {};
 
-	ast.walkRules((rule) => {
+    ast.walkRules((rule) => {
         const parsedRule = backgroundBlockParser(rule);
-        
+
         const UsingThisLoader = !!parsedRule.image || parsedRule.imageSet.length !== 0;
-        if(UsingThisLoader) {
-            promises.push(applySpriteCategory.call(this, parsedRule, queryParam, defaultName, filter).then(({parsedRule, images}) => {
-                //logger('images', images)
-                if(parsedRule.imageSet.length > 0) needMediaQuery = true;
+        if (UsingThisLoader) {
+            promises.push(applySpriteCategory.call(this, parsedRule, queryParam, defaultName, filter).then(({ parsedRule, images }) => {
+                // logger('images', images)
+                if (parsedRule.imageSet.length > 0)
+                    needMediaQuery = true;
                 addCSSBlockToList(parsedRule, images, cssBlockList, openSlotInCSSBlock);
             }));
         }
-
     });
 
     Promise.all(promises).then(() => {
-        if(needMediaQuery){ 
-            Object.keys(cssBlockList).forEach(k => {
-                const { 
+        if (needMediaQuery) {
+            Object.keys(cssBlockList).forEach((k) => {
+                const {
                     parsedRule,
                     hashMediaQ,
                 } = cssBlockList[k];
-                if(parsedRule.imageSet.length > 0){
-                    parsedRule.imageSet.forEach(m => {
-                        let retinaNumber = /(\dx)/.exec(m.split(' ')[1])[1];
-                        if(Number(/(\d)x/.exec(retinaNumber)[1]) > 1){
-                            if(!mediaQ[retinaNumber])
+                if (parsedRule.imageSet.length > 0) {
+                    parsedRule.imageSet.forEach((m) => {
+                        const retinaNumber = /(\dx)/.exec(m.split(' ')[1])[1];
+                        if (Number(/(\d)x/.exec(retinaNumber)[1]) > 1) {
+                            if (!mediaQ[retinaNumber])
                                 mediaQ[retinaNumber] = [];
 
-                            mediaQ[retinaNumber].push({parsedRule, hashMediaQ});                       
+                            mediaQ[retinaNumber].push({ parsedRule, hashMediaQ });
                         }
-
-                    })
+                    });
                 }
             });
-            Object.keys(mediaQ).forEach(retinaNumber => {
+            Object.keys(mediaQ).forEach((retinaNumber) => {
                 ast.append(mediaQuery(Number(/(\d)x/.exec(retinaNumber)[1])));
                 const node = ast.nodes[ast.nodes.length - 1];
-                mediaQ[retinaNumber].forEach(q => {
-                    node.append(`${q.parsedRule.selector}{background:${q.hashMediaQ[retinaNumber]};}`) 
-                })          
-            })
+                mediaQ[retinaNumber].forEach((q) => {
+                    node.append(`${q.parsedRule.selector}{background:${q.hashMediaQ[retinaNumber]};}`);
+                });
+            });
         }
-
 
         let cssStr = '';
         if (!acceptPostCssAst) {
-            css.stringify(ast, (str) => {
+            postcss.stringify(ast, (str) => {
                 cssStr += str;
             });
         }
         callback(null, acceptPostCssAst ? ast : cssStr);
-
     });
-
 }
 
+cssSpriteLoader.Plugin = Plugin;
 
-ImageSpriteLoader.Plugin = plugin;
+cssSpriteLoader.acceptPostCssAst = true;
 
-ImageSpriteLoader.acceptPostCssAst = true;
-
-module.exports = ImageSpriteLoader;
+module.exports = cssSpriteLoader;
