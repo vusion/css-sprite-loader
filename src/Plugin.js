@@ -1,152 +1,91 @@
 'use strict';
 
-const NAMESPACE = 'CssSpritePlugin';
-const NullFactory = require('webpack/lib/NullFactory');
-const getAllModules = require('./getAllModules');
-const ReplaceDependency = require('./replaceDependecy');
-const {
-    rewriteBackgroundDecl,
-    rewriteBackgroundMediaQuery,
-} = require('./backgroundBlockParser');
-const utils = require('./utils');
-const SpriteSmithWrapper = require('./applySpriteSmith');
-const CSS_RULE = /cssRule-([^;]+);/g;
-const MEDIAQ_RULE = /mediaQ(\dx)-([^;]+);/g;
-const PADDING = 0;
+const fs = require('fs');
+const path = require('path');
+const SpriteSmith = require('spritesmith');
+const { BasePlugin } = require('base-css-image-loader');
+const computeNewBackground = require('./computeNewBackground');
 
-class CSSSpritePlugin {
+class CSSSpritePlugin extends BasePlugin {
     constructor(options) {
-        this.options = Object.assign({
-            output: './',
-            padding: PADDING,
+        options = options || {};
+        super();
+
+        this.NAMESPACE = 'CSSSpritePlugin';
+        this.MODULE_MARK = 'isCSSSpriteModule';
+        this.REPLACE_REG = /CSS_SPRITE_LOADER_IMAGE\('([^)'"]*?)', '([^)'"]*)'\)/g;
+        this.REPLACE_AFTER_OPTIMIZE_TREE = true;
+
+        this.options = Object.assign(this.options, {
+            // @inherit: output: './',
+            // @inherit: filename: '[fontName].[ext]?[hash]',
+            // @inherit: publicPath: undefined,
+            padding: 40,
             queryParam: 'sprite',
             defaultName: 'sprite',
             filter: 'query',
             plugins: [],
-            publicPath: undefined,
         }, options);
-        this.spriteSmith = new SpriteSmithWrapper(this.options);
+        // this.spriteSmith =
+        this.data = {}; // { [group: string]: { [md5: string]: { url, filePath, md5 } } }
     }
     apply(compiler) {
-        if (compiler.hooks) {
-            compiler.hooks.afterPlugins.tap(NAMESPACE, (compiler) => this.afterPlugins());
-            compiler.hooks.thisCompilation.tap(NAMESPACE, (compilation, params) => {
-                compilation.hooks.optimizeTree.tapAsync(NAMESPACE, (chunks, modules, callback) => this.optimizeTree(callback, compilation));
-                compilation.hooks.optimizeExtractedChunks.tap(NAMESPACE, (chunks) => this.optimizeExtractedChunks(chunks));
-                compilation.hooks.afterOptimizeTree.tap(NAMESPACE, (modules) => this.afterOptimizeTree(compilation));
-                compilation.hooks.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.optimizeChunkAssets(chunks, callback, compilation));
-            });
-            compiler.hooks.compilation.tap(NAMESPACE, (compilation, params) => {
-                compilation.hooks.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.attachMediaQuery(chunks, callback));
-                compilation.hooks.normalModuleLoader.tap(NAMESPACE, (loaderContext) => this.normalModuleLoader(loaderContext));
-            });
-        } else {
-            compiler.plugin('after-plugins', (compiler) => this.afterPlugins());
-
-            compiler.plugin('this-compilation', (compilation, params) => {
-                compilation.dependencyFactories.set(ReplaceDependency, new NullFactory());
-                compilation.dependencyTemplates.set(ReplaceDependency, ReplaceDependency.Template);
-                compilation.plugin('optimize-tree', (chunks, modules, callback) => this.optimizeTree(callback, compilation));
-                compilation.plugin('optimize-extracted-chunks', (chunks) => this.optimizeExtractedChunks(chunks));
-                compilation.plugin('after-optimize-tree', (modules) => this.afterOptimizeTree(compilation));
-                compilation.plugin('optimize-chunk-assets', (chunks, callback) => this.optimizeChunkAssets(chunks, callback, compilation));
-            });
-
-            compiler.plugin('compilation', (compilation, params) => {
-                // compilation.plugin.optimizeChunkAssets.tapAsync(NAMESPACE, (chunks, callback) => this.attachMediaQuery(chunks, callback))
-                compilation.plugin('normal-module-loader', (loaderContext) => this.normalModuleLoader(loaderContext));
-            });
-        }
-    }
-    afterPlugins() {
-        // this.images = {};
-        this.cssBlockList = {};
-        // this.localImageList = {};
-    }
-    optimizeTree(callback, compilation) {
-        utils.logger('cssBlockList', this.cssBlockList);
-        Promise.all(this.spriteSmith.apply(this.cssBlockList, compilation))
-            .then(() => {
-                callback();
-            });
-    }
-    optimizeExtractedChunks(chunks) {
-    }
-    optimizeChunkAssets(chunks, callback, compilation) {
-        // chunks.forEach(chunk => {
-        //     const r = chunk.mapModules(m => /\.css$/.test(m.request) && m).filter(Boolean)
-        //     r.forEach(n => console.log(n._source));
-        //     // chunk.files.forEach(file => {
-        //     //     console.log(file);
-        //     //     // if(/\.css/.test(file)){
-        //     //     //     console.log(file);
-        //     //     // }
-        //     // });
-        // });
-        callback();
-    }
-    afterOptimizeTree(compilation) {
-        const allModules = getAllModules(compilation);
-
-        allModules.forEach((module) => {
-            const replaceDependency = module.dependencies.filter((dependency) => dependency.constructor === ReplaceDependency)[0];
-            const source = module._source;
-            let range = [];
-            if (typeof source === 'string') {
-                range = this.replaceHolder(module._source);
-            } else if (typeof source === 'object' && typeof source._value === 'string') {
-                range = this.replaceHolder(source._value);
-            }
-            if (range.length > 0) {
-                if (replaceDependency) {
-                    replaceDependency.updateRange(range);
-                } else {
-                    module.addDependency(new ReplaceDependency(range));
-                }
-            }
+        this.plugin(compiler, 'thisCompilation', (compilation, params) => {
+            this.plugin(compilation, 'optimizeTree', (chunks, modules, callback) => this.optimizeTree(compilation, chunks, modules, callback));
         });
+        super.apply(compiler);
     }
 
-    attachMediaQuery(chunks, callback) {
-        console.log('attachMediaQuery');
-        chunks.forEach((chunk) => {
-            console.log({
-                id: chunk.id,
-                name: chunk.name,
-                includes: chunk.modules.map((module) => module.request),
-            });
+    optimizeTree(compilation, chunks, modules, callback) {
+        const promises = Object.keys(this.data).map((groupName) => {
+            const group = this.data[groupName];
+            const files = Object.keys(group).map((key) => group[key].filePath);
+
+            return new Promise((resolve, reject) => SpriteSmith.run({
+                src: files,
+                algorithm: 'binary-tree',
+                padding: this.options.padding,
+            }, (err, result) => err ? reject(err) : resolve(result)))
+                .then((result) => {
+                    const output = this.getOutput({
+                        name: groupName,
+                        ext: 'png',
+                        content: result.image,
+                    }, compilation);
+
+                    compilation.assets[output.path] = {
+                        source: () => result.image,
+                        size: () => result.image.length,
+                    };
+
+                    const coordinates = result.coordinates;
+                    Object.keys(group).forEach((key) => {
+                        const item = group[key];
+                        // Add new background according to result of sprite
+                        item.background = computeNewBackground(item.oldBackground, item.blockSize, coordinates[item.filePath], result.properties);
+                        item.background.image = `url('${output.url.replace(/'/g, "\\'")}')`;
+                        item.background.valid = true;
+                    });
+                });
         });
-        callback();
+
+        Promise.all(promises).then(() => callback());
     }
 
-    normalModuleLoader(loaderContext) {
-        loaderContext.CSSSpritePlugin = this;
+    /**
+     * @override
+     * Replace Function
+     */
+    REPLACE_FUNCTION(groupName, id) {
+        return this.data[groupName][id].background.toString();
     }
 
-    replaceHolder(source) {
-        const blocks = this.cssBlockList;
-        const rangeList = [];
-        let arr;
-
-        // source.replaceReg()
-        while ((arr = CSS_RULE.exec(source)) !== null) {
-            const [matched, hash] = arr;
-            const index = arr.index;
-            // console.log(matched.substring(0, matched.length-1), hash, index);
-            const block = blocks[matched.substring(0, matched.length - 1)];
-            const css = rewriteBackgroundDecl(block.parsedRule);
-            rangeList.push([index - 12, index + matched.length - 1, css]);
-        }
-
-        while ((arr = MEDIAQ_RULE.exec(source)) !== null) {
-            const [matched, group, hash] = arr;
-            const index = arr.index;
-            // const block = blocks[matched.substring(0, matched.length-1)];
-            const block = blocks[`cssRule-${hash}`];
-            const css = rewriteBackgroundMediaQuery(block.parsedRule, group);
-            rangeList.push([index - 11, index + matched.length - 1, css]);
-        }
-        return rangeList;
+    /**
+     * @override
+     * Replace Function to escape
+     */
+    REPLACE_FUNCTION_ESCAPED(groupName, id) {
+        return this.data[groupName][id].background.toString();
     }
 }
 

@@ -16,6 +16,6 @@ module.exports = {
         ],
     },
     plugins: [new CSSSpritePlugin({
-        publicPath: 'dest/'
+        publicPath: 'dest/',
     })],
 };

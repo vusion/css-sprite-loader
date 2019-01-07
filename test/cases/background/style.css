@@ -16,7 +16,7 @@ body {
 .sprite.simple {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/home.png?sprite');
+    background: url('../../fixtures/images/home.png?sprite') no-repeat;
 }
 
 .source.background-image {
@@ -71,12 +71,14 @@ body {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png');
+    background-repeat: no-repeat;
     background-size: 100%;
 }
 .sprite.bg-size {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png?sprite');
+    background-repeat: no-repeat;
     background-size: 100%;
 }
 
@@ -84,12 +86,14 @@ body {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png');
+    background-repeat: no-repeat;
     background-size: 80px;
 }
 .sprite.bg-size-pixel {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png?sprite');
+    background-repeat: no-repeat;
     background-size: 80px;
 }
 
@@ -97,12 +101,14 @@ body {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png');
+    background-repeat: no-repeat;
     background-size: auto 120px;
 }
 .sprite.bg-size-height {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png?sprite');
+    background-repeat: no-repeat;
     background-size: auto 120px;
 }
 
@@ -110,12 +116,14 @@ body {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png');
+    background-repeat: no-repeat;
     background-size: cover;
 }
 .sprite.bg-size-cover {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png?sprite');
+    background-repeat: no-repeat;
     background-size: cover;
 }
 
@@ -123,12 +131,14 @@ body {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png');
+    background-repeat: no-repeat;
     background-size: contain;
 }
 .sprite.bg-size-contain {
     width: 100px;
     height: 150px;
     background-image: url('../../fixtures/images/lollipop.png?sprite');
+    background-repeat: no-repeat;
     background-size: contain;
 }
 
@@ -136,78 +146,78 @@ body {
     width: 100px;
     height: 150px;
     background-size: 100%;
-    background: url('../../fixtures/images/lollipop.png');
+    background: url('../../fixtures/images/lollipop.png') no-repeat;
 }
 .sprite.bg-size-override {
     width: 100px;
     height: 150px;
     background-size: 100%;
-    background: url('../../fixtures/images/lollipop.png?sprite');
+    background: url('../../fixtures/images/lollipop.png?sprite') no-repeat;
 }
 
 .source.bg-position {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/tag.png') 60px -40px no-repeat;
+    background: url('../../fixtures/images/tag.png') 30px -20px no-repeat;
 }
 .sprite.bg-position {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/tag.png?sprite') 60px -40px no-repeat;
+    background: url('../../fixtures/images/tag.png?sprite') 30px -20px no-repeat;
 }
 
 .source.bg-position-outside {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/tag.png') no-repeat;
-    background-position: 60px -40px;
+    background-position: 30px -20px;
 }
 .sprite.bg-position-outside {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/tag.png?sprite') no-repeat;
-    background-position: 60px -40px;
+    background-position: 30px -20px;
 }
 
 .source.bg-position-override {
     width: 128px;
     height: 128px;
-    background-position: 60px -40px;
+    background-position: 30px -20px;
     background: url('../../fixtures/images/tag.png') no-repeat;
 }
 .sprite.bg-position-override {
     width: 128px;
     height: 128px;
-    background-position: 60px -40px;
+    background-position: 30px -20px;
     background: url('../../fixtures/images/tag.png?sprite') no-repeat;
 }
 
 .source.bg-position-and-size {
     width: 100px;
     height: 150px;
-    background: url('../../fixtures/images/html.png') 60px -40px;
+    background: url('../../fixtures/images/html.png') 30px 20px no-repeat;
     background-size: 100%;
 }
 .sprite.bg-position-and-size {
     width: 100px;
     height: 150px;
-    background: url('../../fixtures/images/html.png?sprite') 60px -40px;
+    background: url('../../fixtures/images/html.png?sprite') 30px 20px no-repeat;
     background-size: 100%;
 }
 
 .source.bg-position-and-size-outside {
     width: 200px;
     height: 200px;
-    background: url('../../fixtures/images/html.png');
+    background: url('../../fixtures/images/html.png') no-repeat;
     background-size: 200px 100px;
-    background-position: 60px -40px;
+    background-position: 30px 20px;
 }
 .sprite.bg-position-and-size-outside {
     width: 200px;
     height: 200px;
-    background: url('../../fixtures/images/html.png?sprite');
+    background: url('../../fixtures/images/html.png?sprite') no-repeat;
     background-size: 200px 100px;
-    background-position: 60px -40px;
+    background-position: 30px 20px;
 }
 
 .source.without-image-set {
@@ -221,7 +231,7 @@ body {
     background: url('../../fixtures/images/retina/angry-birds.png?sprite');
 }
 
-.source.image-set {
+/* .source.image-set {
     width: 128px;
     height: 128px;
     background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
@@ -262,15 +272,15 @@ body {
     background-size: 80%;
     background-position: 60px 40px;
 }
-.source.image-set-captain-america{
+.source.image-set-captain-america {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/captain-america.png');
     background: -webkit-image-set(url('../../fixtures/images/retina/captain-america.png') 1x, url('../../fixtures/images/retina/captain-america@2x.png') 2x);
 }
-.sprite.image-set-captain-america{
+.sprite.image-set-captain-america {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/captain-america.png?sprite');
     background: -webkit-image-set(url('../../fixtures/images/retina/captain-america.png?sprite') 1x, url('../../fixtures/images/retina/captain-america@2x.png?sprite') 2x);
-}
+} */

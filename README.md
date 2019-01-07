@@ -37,6 +37,15 @@ Then `css-sprite-loader` will generate a sprite image.
 }
 ```
 
+## Features
+
+Our loader works in a way different to others:
+
+- Fully reuse css `background` property, both shorthand and longhand.
+- Easy to toggle whether use sprite or not by path query or config.
+- Merge duplicated pngs in the same situation. We will merge those pngs into only one to keep slim even they lie in different places in your project.
+
+
 ## Install
 
 ``` shell
@@ -91,26 +100,46 @@ None.
 
 #### defaultName
 
+Default sprite group name.
+
 - Type: `string`
 - Default: `'sprite'`
 
-Default file name of sprite output file.
+#### filename
+
+Output filename format like output. filename of Webpack. The following tokens will be replaced:
+
+- `[ext]` the extension of the resource
+- `[name]` the group name
+- `[hash]` the hash of svg file (Buffer) (by default it's the hex digest of the md5 hash, and all file will use hash of the svg file)
+- `[<hashType>:hash:<digestType>:<length>]` optionally one can configure
+    - other `hashType`s, i. e. `sha1`, `md5`, `sha256`, `sha512`
+    - other `digestType`s, i. e. `hex`, `base26`, `base32`, `base36`, `base49`, `base52`, `base58`, `base62`, `base64`
+    - and `length` the length in chars
+
+
+- Type: `string`
+- Default: `'[name].[ext]?[hash]'`
 
 #### output
 
-Path of sprite png to webpack output path. **Must be a relative path.**
+Output path of emitted image files, relative to webpack output path. **Must be a relative path.**
 
 - Type: `string`
-- Default: `./`
+- Default: `'./'`
+
+#### publicPath
+
+Image public path in css url, same as webpack output.publicPath. This option is for overriding it.
+
+- Type: `string`
+- Default: `''`
 
 #### padding
 
+The padding between small images in sprite.
+
 - Type: `number`
-- Default: `'sprite'`
-
-The margin between small images in sprite.
-
-- Type: `Number`
 - Default: `20`
 
 #### filter
@@ -120,26 +149,25 @@ The margin between small images in sprite.
 
 Options: `'all'`、`'query'`、`RegExp`
 
-How to filter image files for merging:
+How to filter source image files for merging:
+
 - `'all'`: All imported images will be merged.
 - `'query'`: Only image path with `?sprite` query param will be merged.
 - `RegExp`: Only image path matched by RegExp
 
 #### queryParam
 
-Customize key of query param in svg path. Only works when `filter: 'query'`
+Customize key of query param in svg path. Only works when `filter: 'query'`.
 
 - Type: `string`
 - Default: `'sprite'`
 
 #### plugins
 
-Postcss plugin list
+Postcss plugins will be processed on related codes after creating sprite image. For example, you can use `require('postcss-px-to-viewport')` to convert units of background value.
 
 - Type: `Array`
 - Default: `[]`
-
-These postcss plugins will be processed on related codes after creating sprite image. For example, you can use `require('postcss-px-to-viewport')` to convert units of background value.
 
 ## Changelog
 
