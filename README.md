@@ -41,7 +41,7 @@ Then `css-sprite-loader` will generate a sprite image.
 
 Our loader works in a way different to others:
 
-- Easy to decide whether use sprite or not by path query.
+- Easy to switch whether use sprite or not by path query.
 - Support retina.
 - Fully support css `background` property, includes `background-position`, `background-size` and others. Make sure there are same effect before and after handling. For example:
 
