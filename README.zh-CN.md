@@ -18,8 +18,7 @@ css-sprite-loader 会自动生成雪碧图：
 
 ``` css
 .foo {
-    background: url(/sprite.png?5d40e339682970eb14baf6110a83ddde) no-repeat;
-    background-position: -100px -0px;
+    background: url(dest/sprite.png?5d40e339682970eb14baf6110a83ddde) -100px 0 no-repeat;
 }
 ```
 
@@ -27,9 +26,32 @@ css-sprite-loader 会自动生成雪碧图：
 
 与别的类似的雪碧图加载器不同的是：
 
-- 全面复用 CSS 的`background`属性，无论是收缩形式还是展开形式。
-- 通过路径参数或配置可以很轻松地切换是否使用雪碧图。
-- 合并相同场景的图片。如果图片所使用的路径、位置大小、重复情况等背景属性都相同，我们会按同一种图片来处理，减少最后生成的图片大小。
+- 通过路径参数可以很轻松地决定是否使用雪碧图。
+- 支持 retina 参数配置。
+- 全面支持 CSS 的`background`属性，包括`background-position`、`background-size`等。保证处理前后效果的一致性。例如：
+
+``` css
+.bg-position-and-size {
+    width: 100px;
+    height: 150px;
+    background: url('../images/html.png?sprite') 30px 20px no-repeat;
+    background-size: 100%;
+}
+```
+
+会重新自动计算位置和大小，转换成
+
+``` css
+.bg-position-and-size {
+    width: 100px;
+    height: 150px;
+    background: url('dest/sprite.png?dc5323f7f35c65a3d6c7f253dcc07bad') -101.25px -111.25px / 231px 231px no-repeat;
+}
+```
+
+> **注意**：
+> - 使用`background-position`，必须用像素值，且位置为左上；
+> - 使用`background-size`时，必须在同一个块中添加`width`和`height`属性，并且均为像素值
 
 ## 安装
 
@@ -57,7 +79,7 @@ module.exports = {
 
 #### sprite
 
-是否将当前的图片打入雪碧图，或打入哪个指定的雪碧图。
+是否将当前的图片打入雪碧图，或指定打入哪个雪碧图。例如：
 
 ``` css
 .foo {
@@ -69,12 +91,59 @@ module.exports = {
 }
 ```
 
-<!-- #### retina
-是否添加雪碧图，这个参数接受一个雪碧图的路径，如果你没有设置路径我们将会从当前图片相同目录下查找带有@2x后缀的图片。实际上你也可以是用retina3x 或者 retina4x的后缀，甚至更多这种格式的参数，我们将会一一适配。
+以上图片将会被打入两个雪碧图中：
 
-- Type: `string`
-- Default: 'background_sprite'
- -->
+``` css
+.foo {
+    background: url('dest/sprite.png?fee16babb11468e0724c07bd3cf2f4cf');
+}
+
+.bar {
+    background: url('dest/sprite-nav.png?56d33b3ab0389c5b349cec93380b7ceb');
+}
+```
+
+### retina, retina@3x, retina@4x, ...
+
+是否支持 retina 屏。`retina`相当于`retina@2x`。比如你的 images 目录中有以下文件：
+
+```
+images/
+    angry-birds.png
+    angry-birds@2x.png
+    angry-birds@4x.png
+```
+
+``` css
+.retina {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina&retina@4x');
+    background-size: 100%;
+}
+```
+
+会转换为
+
+``` css
+.retina {
+    width: 128px;
+    height: 128px;
+    background: url('dest/sprite.png?369108fb0a164b04ee10def7ed6d4226') -296px 0 / 424px 424px no-repeat;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+    .retina {
+        background: url('dest/sprite@2x.png?51d951f98092152d8fc56bf3380577e3') -148px 0 / 276px 128px no-repeat;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 4), (min-resolution: 4dppx) {
+    .retina {
+        background: url('dest/sprite@4x.png?4a6a7dbace7933efe321b357d4db2fb9') 30px 20px / 213px 102px no-repeat;
+    }
+}
+```
 
 ### loader 参数
 

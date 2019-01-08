@@ -41,9 +41,32 @@ Then `css-sprite-loader` will generate a sprite image.
 
 Our loader works in a way different to others:
 
-- Fully reuse css `background` property, both shorthand and longhand.
-- Easy to toggle whether use sprite or not by path query or config.
-- Merge duplicated pngs in the same situation. We will merge those pngs into only one to keep slim even they lie in different places in your project.
+- Easy to decide whether use sprite or not by path query.
+- Support retina.
+- Fully support css `background` property, includes `background-position`, `background-size` and others. Make sure there are same effect before and after handling. For example:
+
+``` css
+.bg-position-and-size {
+    width: 100px;
+    height: 150px;
+    background: url('../images/html.png?sprite') 30px 20px no-repeat;
+    background-size: 100%;
+}
+```
+
+will be newly computed position and size into
+
+``` css
+.bg-position-and-size {
+    width: 100px;
+    height: 150px;
+    background: url('dest/sprite.png?dc5323f7f35c65a3d6c7f253dcc07bad') -101.25px -111.25px / 231px 231px no-repeat;
+}
+```
+
+> **NOTE**
+> - When using `background-position`, value must be pixel and position must be left and top.
+> - When using `background-size`, `width` and `height` properties must be declared in the same rule, and value of those must be pixel.
 
 
 ## Install
@@ -68,29 +91,75 @@ module.exports = {
 };
 ```
 
-### background url query
+### Query params in background url
 
 #### sprite
 
-Whether add this image into sprite image and set which sprite image
+Whether pack this image into sprite. Or set which sprite group to pack. For example:
 
 ``` css
 .foo {
-    background: url('../assets/gift.png?sprite');
+    background: url('../images/gift.png?sprite');
 }
 
 .bar {
-    background: url('../assets/light.png?sprite=sprite-nav');
+    background: url('../images/light.png?sprite=sprite-nav');
 }
 ```
 
-<!-- #### retina
+images will be packed into two sprites.
 
-Whether add retina image, this option accept retina image path, if you don't set retina image path,
-We will search for an image file with @2x in the same folder as the image of retina. For example /images/test.png@sprite&retina we will go to find /images/test@2x.png. you can also use retina3x or retina4x, we will adaptation screen with 3dppx or 4dppx
+``` css
+.foo {
+    background: url('dest/sprite.png?fee16babb11468e0724c07bd3cf2f4cf');
+}
 
-- Type: `string`
-- Default: 'background_sprite' -->
+.bar {
+    background: url('dest/sprite-nav.png?56d33b3ab0389c5b349cec93380b7ceb');
+}
+```
+
+### retina, retina@3x, retina@4x, ...
+
+Whether use retina. `retina` is an alias of `retina@2x`. For example, you have a following directory.
+
+```
+images/
+    angry-birds.png
+    angry-birds@2x.png
+    angry-birds@4x.png
+```
+
+``` css
+.retina {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina&retina@4x');
+    background-size: 100%;
+}
+```
+
+will be converted into
+
+``` css
+.retina {
+    width: 128px;
+    height: 128px;
+    background: url('dest/sprite.png?369108fb0a164b04ee10def7ed6d4226') -296px 0 / 424px 424px no-repeat;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+    .retina {
+        background: url('dest/sprite@2x.png?51d951f98092152d8fc56bf3380577e3') -148px 0 / 276px 128px no-repeat;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 4), (min-resolution: 4dppx) {
+    .retina {
+        background: url('dest/sprite@4x.png?4a6a7dbace7933efe321b357d4db2fb9') 30px 20px / 213px 102px no-repeat;
+    }
+}
+```
 
 ### loader options
 

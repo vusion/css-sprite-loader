@@ -12,10 +12,10 @@ CSSFruit.config({
 function genMediaQuery(resolution, selector, content) {
     const dppx = resolution.slice(0, -1);
     return `@media (-webkit-min-device-pixel-ratio: ${dppx}), (min-resolution: ${dppx}dppx) {
-        ${selector} {
-            ${content}
-        }
-    }`;
+    ${selector} {
+        ${content}
+    }
+}`;
 }
 
 module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (styles, result) => {
@@ -64,7 +64,7 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
             };
 
             const query = oldBackground.image.query;
-            const baseGroupName = query[options.queryParam] === true ? options.defaultName : query[options.queryParam];
+            const baseGroupName = typeof query[options.queryParam] === 'string' ? query[options.queryParam] : options.defaultName;
 
             // According to query retina, collect image set
             const pathRE = /(^.*?)(?:@(\d+x))?\.png$/;
