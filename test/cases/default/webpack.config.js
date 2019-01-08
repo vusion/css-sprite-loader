@@ -15,7 +15,5 @@ module.exports = {
             { test: /\.png$/, use: ['file-loader'] },
         ],
     },
-    plugins: [new CSSSpritePlugin({
-        publicPath: 'dest/',
-    })],
+    plugins: [new CSSSpritePlugin()],
 };

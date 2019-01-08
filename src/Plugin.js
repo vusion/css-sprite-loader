@@ -1,7 +1,8 @@
 'use strict';
 
-const SpriteSmith = require('spritesmith');
 const { BasePlugin } = require('base-css-image-loader');
+const SpriteSmith = require('spritesmith');
+const postcss = require('postcss');
 const computeNewBackground = require('./computeNewBackground');
 
 class CSSSpritePlugin extends BasePlugin {
@@ -71,7 +72,11 @@ class CSSSpritePlugin extends BasePlugin {
                             result.properties,
                         );
                         background.valid = true;
-                        item.content = background.toString();
+                        const content = background.toString();
+
+                        return postcss(this.options.plugins).process(`background: ${content};`).then((result) => {
+                            item.content = result.root.nodes[0].value;
+                        });
                     });
                 });
         });
