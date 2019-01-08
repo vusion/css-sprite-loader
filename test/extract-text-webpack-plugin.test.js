@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
-const utils = require('../src/utils');
+const { utils } = require('base-css-image-loader');
 const shell = require('shelljs');
 const execa = require('execa');
 
