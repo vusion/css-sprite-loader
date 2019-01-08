@@ -8,7 +8,6 @@ module.exports = {
     output: {
         path: __dirname + '/dest',
         filename: '[name].js',
-        // publicPath: 'dest/',
     },
     module: {
         rules: [
@@ -20,10 +19,7 @@ module.exports = {
         ],
     },
     plugins: [
-        new CSSSpritePlugin({
-            // output: '../',
-            // @TODO: publicPath
-        }),
+        new CSSSpritePlugin(),
         new ExtractTextPlugin('bundle.css'),
     ],
 };
