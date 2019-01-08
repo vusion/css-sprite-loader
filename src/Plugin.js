@@ -1,7 +1,5 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const SpriteSmith = require('spritesmith');
 const { BasePlugin } = require('base-css-image-loader');
 const computeNewBackground = require('./computeNewBackground');
@@ -27,7 +25,7 @@ class CSSSpritePlugin extends BasePlugin {
             plugins: [],
         }, options);
         // this.spriteSmith =
-        this.data = {}; // { [group: string]: { [md5: string]: { url, filePath, md5 } } }
+        this.data = {}; // { [group: string]: { [md5: string]: { id: string, oldBackground: Background } } }
     }
     apply(compiler) {
         this.plugin(compiler, 'thisCompilation', (compilation, params) => {
@@ -39,7 +37,10 @@ class CSSSpritePlugin extends BasePlugin {
     optimizeTree(compilation, chunks, modules, callback) {
         const promises = Object.keys(this.data).map((groupName) => {
             const group = this.data[groupName];
-            const files = Object.keys(group).map((key) => group[key].filePath);
+            const keys = Object.keys(group);
+            // Make sure same cachebuster in uncertain file loaded order
+            !this.watching && keys.sort();
+            const files = Array.from(new Set(keys.map((key) => group[key].filePath)));
 
             return new Promise((resolve, reject) => SpriteSmith.run({
                 src: files,
@@ -59,12 +60,18 @@ class CSSSpritePlugin extends BasePlugin {
                     };
 
                     const coordinates = result.coordinates;
-                    Object.keys(group).forEach((key) => {
+                    keys.forEach((key) => {
                         const item = group[key];
                         // Add new background according to result of sprite
-                        item.background = computeNewBackground(item.oldBackground, item.blockSize, coordinates[item.filePath], result.properties);
-                        item.background.image = `url('${output.url.replace(/'/g, "\\'")}')`;
-                        item.background.valid = true;
+                        const background = computeNewBackground(
+                            item.oldBackground,
+                            output.url,
+                            item.blockSize,
+                            coordinates[item.filePath],
+                            result.properties,
+                        );
+                        background.valid = true;
+                        item.content = background.toString();
                     });
                 });
         });
@@ -77,7 +84,7 @@ class CSSSpritePlugin extends BasePlugin {
      * Replace Function
      */
     REPLACE_FUNCTION(groupName, id) {
-        return this.data[groupName][id].background.toString();
+        return this.data[groupName][id].content;
     }
 
     /**
@@ -85,7 +92,7 @@ class CSSSpritePlugin extends BasePlugin {
      * Replace Function to escape
      */
     REPLACE_FUNCTION_ESCAPED(groupName, id) {
-        return this.data[groupName][id].background.toString();
+        return this.data[groupName][id].content;
     }
 }
 

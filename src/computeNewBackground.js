@@ -27,12 +27,13 @@ function checkBackgroundPosition(position) {
  * @param {no units -> Length} blockSize
  * @param {no units} imageDimension
  * @param {no units} spriteSize
+ * @param {number} dppx
  */
-module.exports = function computeNewBackground(oldBackground, blockSize, imageDimension, spriteSize) {
+module.exports = function computeNewBackground(oldBackground, url, blockSize, imageDimension, spriteSize) {
     const background = new Background();
     background.color = oldBackground.color;
-    // background.image
     background.repeat = 'no-repeat';
+    background.image = `url('${url.replace(/'/g, "\\'")}')`;
     // background.clip
     // background.origin
     // background.attachment
@@ -105,12 +106,12 @@ module.exports = function computeNewBackground(oldBackground, blockSize, imageDi
             spriteRadio.y = spriteRadio.x;
 
         background.size = new BackgroundSize();
-        background.size.width = spriteSize.width * spriteRadio.x + 'px';
-        background.size.height = spriteSize.height * spriteRadio.y + 'px';
+        background.size.width = (spriteSize.width * spriteRadio.x).toFixed(0) + 'px';
+        background.size.height = (spriteSize.height * spriteRadio.y).toFixed(0) + 'px';
         background.size.valid = true;
 
-        background.position.x.offset.number = oldBackground.position.x.offset.number * spriteRadio.x - imageDimension.x * spriteRadio.x;
-        background.position.y.offset.number = oldBackground.position.y.offset.number * spriteRadio.y - imageDimension.y * spriteRadio.y;
+        background.position.x.offset.number = oldBackground.position.x.offset.number - imageDimension.x * spriteRadio.x;
+        background.position.y.offset.number = oldBackground.position.y.offset.number - imageDimension.y * spriteRadio.y;
     }
 
     return background;

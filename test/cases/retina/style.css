@@ -33,6 +33,19 @@ body {
     background-size: 100%;
 }
 
+.source.retina2x {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds@2x.png');
+    background-size: 100%;
+}
+.sprite.retina2x {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds@2x.png?sprite&retina@1x');
+    background-size: 100%;
+}
+
 .source.retina4x {
     width: 128px;
     height: 128px;
@@ -42,45 +55,49 @@ body {
 .sprite.retina4x {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina&retina3x&retina4x');
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina&retina@3x&retina@4x');
     background-size: 100%;
 }
 
 .source.simple-2 {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/captain-america.png');
-    background-size: 100%;
+    background: url('../../fixtures/images/retina/captain-america.png') no-repeat;
+    background-size: 80%;
 }
 .sprite.simple-2 {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/captain-america.png?sprite');
-    background-size: 100%;
+    background: url('../../fixtures/images/retina/captain-america.png?sprite') no-repeat;
+    background-size: 80%;
 }
 
 .source.retina-2 {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/captain-america@2x.png');
-    background-size: 100%;
+    background: url('../../fixtures/images/retina/captain-america@2x.png') no-repeat;
+    background-size: 80%;
+    background-position: 30px 20px;
 }
 .sprite.retina-2 {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/captain-america.png?sprite&retina');
-    background-size: 100%;
+    background: url('../../fixtures/images/retina/captain-america.png?sprite&retina') no-repeat;
+    background-size: 80%;
+    background-position: 30px 20px;
 }
 
 .source.retina4x-2 {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/captain-america@4x.png');
-    background-size: 100%;
+    background: url('../../fixtures/images/retina/captain-america@4x.png') no-repeat;
+    background-size: 80%;
+    background-position: 30px 20px;
 }
 .sprite.retina4x-2 {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/captain-america.png?sprite&retina&retina3x&retina4x');
-    background-size: 100%;
+    background: url('../../fixtures/images/retina/captain-america.png?sprite&retina&retina@3x&retina@4x') no-repeat;
+    background-size: 80%;
+    background-position: 30px 20px;
 }
