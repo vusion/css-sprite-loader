@@ -103,7 +103,7 @@ module.exports = {
 }
 ```
 
-### retina, retina@3x, retina@4x, ...
+#### retina, retina@3x, retina@4x, ...
 
 是否支持 retina 屏。`retina`相当于`retina@2x`。比如你的 images 目录中有以下文件：
 

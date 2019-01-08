@@ -119,7 +119,7 @@ images will be packed into two sprites.
 }
 ```
 
-### retina, retina@3x, retina@4x, ...
+#### retina, retina@3x, retina@4x, ...
 
 Whether use retina. `retina` is an alias of `retina@2x`. For example, you have a following directory.
 
