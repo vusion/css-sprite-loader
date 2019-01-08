@@ -21,8 +21,7 @@ function genMediaQuery(resolution, selector, content) {
 module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (styles, result) => {
     const promises = [];
     const plugin = loaderContext.relevantPlugin;
-    const defaultName = plugin.options.defaultName;
-    const queryParam = plugin.options.queryParam;
+    const options = plugin.options;
     const data = plugin.data;
 
     styles.walkRules((rule) => {
@@ -36,10 +35,19 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
         } catch (e) {
             return Promise.reject(e);
         }
-        if (!(oldBackground.image && oldBackground.image.query && oldBackground.image.query[queryParam]))
+        if (!oldBackground.image)
             return;
         if (!oldBackground.image.path.endsWith('.png'))
             return;
+        if (options.filter === 'query') {
+            if (!(oldBackground.image.query && oldBackground.image.query[options.queryParam]))
+                return;
+        } else if (options.filter instanceof RegExp) {
+            if (!oldBackground.image.path.test(options.filter))
+                return;
+        } else if (options.filter !== 'all')
+            return;
+
         promises.push(new Promise((resolve, reject) => {
             loaderContext.resolve(loaderContext.context, oldBackground.image.path, (err, result) => err ? reject(err) : resolve(result));
         }).then((filePath) => {
@@ -56,7 +64,7 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
             };
 
             const query = oldBackground.image.query;
-            const baseGroupName = query[queryParam] === true ? defaultName : query[queryParam];
+            const baseGroupName = query[options.queryParam] === true ? options.defaultName : query[options.queryParam];
 
             // According to query retina, collect image set
             const pathRE = /(^.*?)(?:@(\d+x))?\.png$/;
