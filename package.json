@@ -35,15 +35,13 @@
     "loader"
   ],
   "dependencies": {
-    "base-css-image-loader": "^0.1.5",
+    "base-css-image-loader": "^0.2.0",
+    "css-fruit": "^0.1.2",
     "postcss": "^6.0.16",
-    "spritesmith": "^3.2.1",
-    "webpack-sources": "^1.0.1"
+    "spritesmith": "^3.2.1"
   },
   "devDependencies": {
-    "autoprefixer": "^9.1.1",
     "chai": "^4.1.2",
-    "css-fruit": "^0.1.1",
     "css-loader": "^0.28.4",
     "eslint": "^4.15.0",
     "eslint-config-vusion": "^2.0.3",
