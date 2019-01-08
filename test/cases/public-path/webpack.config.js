@@ -1,5 +1,4 @@
 const CSSSpritePlugin = require('../../../index').Plugin;
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -8,21 +7,16 @@ module.exports = {
     output: {
         path: __dirname + '/dest',
         filename: '[name].js',
-        publicPath: '/dest/',
+        publicPath: '/some/public/',
     },
     module: {
         rules: [
-            { test: /\.css$/, use: ExtractTextPlugin.extract({
-                fallback: 'style-loader',
-                use: ['css-loader', require.resolve('../../../index')],
-            }) },
+            { test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../../../index')] },
             { test: /\.png$/, use: ['file-loader'] },
         ],
     },
-    plugins: [
-        new CSSSpritePlugin({
-            output: '/static/image',
-        }),
-        new ExtractTextPlugin('bundle.css'),
-    ],
+    plugins: [new CSSSpritePlugin({
+        output: 'static',
+        publicPath: 'http://cdn.163.com/cdn/static',
+    })],
 };
