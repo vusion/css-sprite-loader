@@ -119,9 +119,9 @@ images will be packed into two sprites.
 }
 ```
 
-#### retina, retina@3x, retina@4x, ...
+#### retina@2x, retina@3x, retina@4x, ...
 
-Whether use retina. `retina` is an alias of `retina@2x`. For example, you have a following directory.
+Whether use retina. For example, you have a following directory.
 
 ```
 images/
@@ -134,12 +134,12 @@ images/
 .retina {
     width: 128px;
     height: 128px;
-    background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina&retina@4x');
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina@2x&retina@4x');
     background-size: 100%;
 }
 ```
 
-will be converted into
+will be converted to
 
 ``` css
 .retina {
@@ -151,6 +151,46 @@ will be converted into
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
     .retina {
         background: url('dest/sprite@2x.png?51d951f98092152d8fc56bf3380577e3') -148px 0 / 276px 128px no-repeat;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 4), (min-resolution: 4dppx) {
+    .retina {
+        background: url('dest/sprite@4x.png?4a6a7dbace7933efe321b357d4db2fb9') 30px 20px / 213px 102px no-repeat;
+    }
+}
+```
+
+You can also use @2x as default resolution:
+
+```
+images/
+    angry-birds@1x.png
+    angry-birds@2x.png
+    angry-birds@4x.png
+```
+
+``` css
+.retina {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds@2x.png?sprite&retina@1x&retina@4x');
+    background-size: 100%;
+}
+```
+
+This will be converted to
+
+``` css
+.retina {
+    width: 128px;
+    height: 128px;
+    background: url('dest/sprite.png?369108fb0a164b04ee10def7ed6d4226') 0 0 / 212px 212px no-repeat;
+}
+
+@media (-webkit-max-device-pixel-ratio: 1), (max-resolution: 1dppx) {
+    .retina {
+        background: url('dest/sprite@1x.png?e5cf95daa8d2c40e290009620b13fba3') 0 0 / 128px 128px no-repeat;
     }
 }
 

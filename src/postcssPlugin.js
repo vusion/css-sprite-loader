@@ -9,22 +9,31 @@ CSSFruit.config({
     },
 });
 
-function genMediaQuery(resolution, selector, content) {
+function genMediaQuery(resolution, defaultResolution, selector, content) {
     const dppx = resolution.slice(0, -1);
-    return `@media (-webkit-min-device-pixel-ratio: ${dppx}), (min-resolution: ${dppx}dppx) {
-    ${selector} {
-        ${content}
+
+    if (resolution > defaultResolution) {
+        return `@media (-webkit-min-device-pixel-ratio: ${dppx}), (min-resolution: ${dppx}dppx) {
+            ${selector} {
+                ${content}
+            }
+        }`;
+    } else if (resolution < defaultResolution) {
+        return `@media (-webkit-max-device-pixel-ratio: ${dppx}), (max-resolution: ${dppx}dppx) {
+            ${selector} {
+                ${content}
+            }
+        }`;
     }
-}`;
 }
 
-module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (styles, result) => {
+module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (root, result) => {
     const promises = [];
     const plugin = loaderContext.relevantPlugin;
     const options = plugin.options;
     const data = plugin.data;
 
-    styles.walkRules((rule) => {
+    root.walkRules((rule) => {
         const decls = rule.nodes.filter((node) => node.type === 'decl' && node.prop.startsWith('background'));
         if (!decls.length)
             return;
@@ -33,7 +42,8 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
         try {
             oldBackground = CSSFruit.absorb(decls);
         } catch (e) {
-            return Promise.reject(e);
+            rule.warn(result, e);
+            return;
         }
         if (!oldBackground.image)
             return;
@@ -74,10 +84,10 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
                 throw new Error('Error format of filePath');
             let [, basePath, defaultResolution] = found;
             if (!defaultResolution)
-                defaultResolution = 'default';
-            // 默认的不一定为 sprite@1x.png，看用户使用情况
-            ruleItem.imageSet[defaultResolution] = filePath;
+                defaultResolution = '1x';
             ruleItem.defaultResolution = defaultResolution;
+            // 默认的不一定为 sprite@1x.png，看用户使用情况
+            ruleItem.imageSet.default = filePath;
 
             Object.keys(query).forEach((param) => {
                 // @compat: old version
@@ -89,7 +99,7 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
                     return;
 
                 const resolution = found[1];
-                ruleItem.imageSet[resolution] = `${basePath}${resolution === '1x' ? '' : '@' + resolution}.png`;
+                ruleItem.imageSet[resolution] = `${basePath}@${resolution}.png`;
             });
 
             // Check width & height
@@ -113,12 +123,12 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
                     content: undefined, // new background cached
                 };
 
-                if (resolution === defaultResolution) {
+                if (resolution === 'default' || resolution === defaultResolution) {
                     rule.append({ prop: 'background', value: `CSS_SPRITE_LOADER_IMAGE('${groupName}', '${groupItem.id}')` });
                 } else {
                     groupName += '@' + resolution;
                     // No problem in async function
-                    rule.after(genMediaQuery(resolution, rule.selector, `background: CSS_SPRITE_LOADER_IMAGE('${groupName}', '${groupItem.id}');`));
+                    rule.after(genMediaQuery(resolution, defaultResolution, rule.selector, `background: CSS_SPRITE_LOADER_IMAGE('${groupName}', '${groupItem.id}');`));
                 }
 
                 if (!data[groupName])

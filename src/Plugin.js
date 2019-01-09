@@ -81,7 +81,7 @@ class CSSSpritePlugin extends BasePlugin {
                 });
         });
 
-        Promise.all(promises).then(() => callback());
+        return Promise.all(promises).then(() => callback()).catch((e) => callback(e));
     }
 
     /**
