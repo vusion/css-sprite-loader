@@ -12,7 +12,7 @@ class CSSSpritePlugin extends BasePlugin {
 
         this.NAMESPACE = 'CSSSpritePlugin';
         this.MODULE_MARK = 'isCSSSpriteModule';
-        this.REPLACE_REG = /CSS_SPRITE_LOADER_IMAGE\('([^)'"]*?)', '([^)'"]*)'\)/g;
+        this.REPLACE_REG = /CSS_SPRITE_LOADER_IMAGE\(([^)'"]*?), ([^)'"]*)\)/g;
         this.REPLACE_AFTER_OPTIMIZE_TREE = true;
 
         this.options = Object.assign(this.options, {

@@ -124,11 +124,11 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
                 };
 
                 if (resolution === 'default' || resolution === defaultResolution) {
-                    rule.append({ prop: 'background', value: `CSS_SPRITE_LOADER_IMAGE('${groupName}', '${groupItem.id}')` });
+                    rule.append({ prop: 'background', value: `CSS_SPRITE_LOADER_IMAGE(${groupName}, ${groupItem.id})` });
                 } else {
                     groupName += '@' + resolution;
                     // No problem in async function
-                    rule.after(genMediaQuery(resolution, defaultResolution, rule.selector, `background: CSS_SPRITE_LOADER_IMAGE('${groupName}', '${groupItem.id}');`));
+                    rule.after(genMediaQuery(resolution, defaultResolution, rule.selector, `background: CSS_SPRITE_LOADER_IMAGE(${groupName}, ${groupItem.id});`));
                 }
 
                 if (!data[groupName])
