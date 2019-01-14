@@ -105,10 +105,10 @@ module.exports = function computeNewBackground(oldBackground, url, blockSize, im
         else if (oldBackground.size.height === 'auto')
             spriteRadio.y = spriteRadio.x;
 
-        background.size = new BackgroundSize();
-        background.size.width = (spriteSize.width * spriteRadio.x).toFixed(0) + 'px';
-        background.size.height = (spriteSize.height * spriteRadio.y).toFixed(0) + 'px';
-        background.size.valid = true;
+        background.size = new BackgroundSize(
+            (spriteSize.width * spriteRadio.x).toFixed(0) + 'px',
+            (spriteSize.height * spriteRadio.y).toFixed(0) + 'px',
+        );
 
         background.position.x.offset.number = oldBackground.position.x.offset.number - imageDimension.x * spriteRadio.x;
         background.position.y.offset.number = oldBackground.position.y.offset.number - imageDimension.y * spriteRadio.y;

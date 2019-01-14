@@ -1,5 +1,6 @@
 const postcss = require('postcss');
 const { utils } = require('base-css-image-loader');
+const meta = require('./meta');
 const CSSFruit = require('css-fruit').default;
 CSSFruit.config({
     forceParsing: {
@@ -29,7 +30,7 @@ function genMediaQuery(resolution, defaultResolution, selector, content) {
 
 module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (root, result) => {
     const promises = [];
-    const plugin = loaderContext.relevantPlugin;
+    const plugin = loaderContext[meta.PLUGIN_NAME];
     const options = plugin.options;
     const data = plugin.data;
 
@@ -38,13 +39,12 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
         if (!decls.length)
             return;
 
-        let oldBackground;
-        try {
-            oldBackground = CSSFruit.absorb(decls);
-        } catch (e) {
-            rule.warn(result, e);
+        const oldBackground = CSSFruit.absorb(decls);
+        if (!oldBackground.valid) {
+            rule.warn(result, 'Invalid background');
             return;
         }
+
         if (!oldBackground.image)
             return;
         if (!oldBackground.image.path.endsWith('.png'))
@@ -124,11 +124,11 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
                 };
 
                 if (resolution === 'default' || resolution === defaultResolution) {
-                    rule.append({ prop: 'background', value: `CSS_SPRITE_LOADER_IMAGE(${groupName}, ${groupItem.id})` });
+                    rule.append({ prop: 'background', value: `${meta.REPLACER_NAME}(${groupName}, ${groupItem.id})` });
                 } else {
                     groupName += '@' + resolution;
                     // No problem in async function
-                    rule.after(genMediaQuery(resolution, defaultResolution, rule.selector, `background: CSS_SPRITE_LOADER_IMAGE(${groupName}, ${groupItem.id});`));
+                    rule.after(genMediaQuery(resolution, defaultResolution, rule.selector, `background: ${meta.REPLACER_NAME}(${groupName}, ${groupItem.id});`));
                 }
 
                 if (!data[groupName])

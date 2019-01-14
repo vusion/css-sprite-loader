@@ -4,16 +4,14 @@ const { BasePlugin } = require('base-css-image-loader');
 const SpriteSmith = require('spritesmith');
 const postcss = require('postcss');
 const computeNewBackground = require('./computeNewBackground');
+const meta = require('./meta');
 
 class CSSSpritePlugin extends BasePlugin {
     constructor(options) {
         options = options || {};
         super();
-
-        this.NAMESPACE = 'CSSSpritePlugin';
-        this.MODULE_MARK = 'isCSSSpriteModule';
-        this.REPLACE_REG = /CSS_SPRITE_LOADER_IMAGE\(([^)'"]*?), ([^)'"]*)\)/g;
         this.REPLACE_AFTER_OPTIMIZE_TREE = true;
+        Object.assign(this, meta);
 
         this.options = Object.assign(this.options, {
             // @inherit: output: './',
@@ -88,7 +86,7 @@ class CSSSpritePlugin extends BasePlugin {
      * @override
      * Replace Function
      */
-    REPLACE_FUNCTION(groupName, id) {
+    REPLACER_FUNC(groupName, id) {
         return this.data[groupName][id].content;
     }
 
@@ -96,7 +94,7 @@ class CSSSpritePlugin extends BasePlugin {
      * @override
      * Replace Function to escape
      */
-    REPLACE_FUNCTION_ESCAPED(groupName, id) {
+    REPLACER_FUNC_ESCAPED(groupName, id) {
         return this.data[groupName][id].content;
     }
 }

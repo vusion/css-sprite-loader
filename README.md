@@ -201,6 +201,9 @@ This will be converted to
 }
 ```
 
+> **NOTE**
+> Here, the original image path corresponding to `retina@1x` should be explicitly named `xxx@1x`, and finally it will be packed into `sprite@1x`.
+
 ### loader options
 
 None.
