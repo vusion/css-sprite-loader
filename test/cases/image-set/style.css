@@ -21,9 +21,20 @@ body {
 .source.image-set {
     width: 128px;
     height: 128px;
-    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
+    background: image-set(url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
 }
 .sprite.image-set {
+    width: 128px;
+    height: 128px;
+    background: image-set(url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
+}
+
+.source.image-set-prefix {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
+}
+.sprite.image-set-prefix {
     width: 128px;
     height: 128px;
     background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);

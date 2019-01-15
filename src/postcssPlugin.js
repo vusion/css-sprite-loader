@@ -40,6 +40,10 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
     const options = plugin.options;
     const data = plugin.data;
 
+    let imageSetFallback = options.imageSetFallback;
+    if (imageSetFallback === true)
+        imageSetFallback = { preserve: true };
+
     styles.walkRules((rule) => {
         const decls = rule.nodes.filter((node) => node.type === 'decl' && node.prop.startsWith('background'));
         if (!decls.length)
@@ -49,7 +53,6 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
          * Core variable 0
          */
         const oldBackground = CSSFruit.absorb(decls);
-        const oldBackgroundString = oldBackground.toString();
         if (!oldBackground.valid) {
             rule.warn(result, 'Invalid background');
             return;
@@ -57,6 +60,11 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
 
         if (!oldBackground.image)
             return;
+
+        // For browsers
+        if (oldBackground.image._type === 'image-set')
+            oldBackground.image.prefix = '-webkit-';
+        const oldBackgroundString = oldBackground.toString();
 
         /**
          * Core variable 1
@@ -114,7 +122,7 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
                 someNeedSprite = image.needSprite;
         });
 
-        if (!someNeedSprite && !(oldBackground.image._type === 'image-set' && options.imageSetFallback))
+        if (!someNeedSprite && !(oldBackground.image._type === 'image-set' && imageSetFallback))
             return;
 
         // Fill image object, add retina image in imageSet
@@ -231,6 +239,12 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
                 }
             });
 
+            if (oldBackground.image._type === 'image-set' && !someNeedSprite && imageSetFallback.preserve)
+                outputs.push(`
+${rule.selector} {
+    background: ${oldBackgroundString};
+}
+`);
             if (outputs.length)
                 rule.after(outputs.join(''));
         }));

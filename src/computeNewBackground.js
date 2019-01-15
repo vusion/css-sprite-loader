@@ -57,7 +57,7 @@ module.exports = function computeNewBackground(oldBackground, url, blockSize, im
     }
 
     if (oldSize) { // Don't process 'auto'
-        blockSize = new BackgroundSize(blockSize.width + ' ' + blockSize.height);
+        blockSize = new BackgroundSize((blockSize.width || (imageDimension.width + 'px')) + ' ' + (blockSize.height || (imageDimension.width + 'px')));
 
         const spriteRadio = {
             x: 1,

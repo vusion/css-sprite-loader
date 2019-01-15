@@ -17,6 +17,6 @@ module.exports = {
     },
     plugins: [new CSSSpritePlugin({
         publicPath: 'dest/',
-        // imageSetFallback: true,
+        imageSetFallback: true,
     })],
 };
