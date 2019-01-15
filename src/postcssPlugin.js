@@ -1,7 +1,8 @@
 const postcss = require('postcss');
 const { utils } = require('base-css-image-loader');
 const meta = require('./meta');
-const CSSFruit = require('css-fruit').default;
+const { default: CSSFruit, Background, URL } = require('css-fruit');
+
 CSSFruit.config({
     forceParsing: {
         url: true,
@@ -15,17 +16,21 @@ function genMediaQuery(resolution, defaultResolution, selector, content) {
     const dppx = resolution.slice(0, -1);
 
     if (resolution > defaultResolution) {
-        return `@media (-webkit-min-device-pixel-ratio: ${dppx}), (min-resolution: ${dppx}dppx) {
-            ${selector} {
-                ${content}
-            }
-        }`;
+        return `
+@media (-webkit-min-device-pixel-ratio: ${dppx}), (min-resolution: ${dppx}dppx) {
+    ${selector} {
+        ${content}
+    }
+}
+`;
     } else if (resolution < defaultResolution) {
-        return `@media (-webkit-max-device-pixel-ratio: ${dppx}), (max-resolution: ${dppx}dppx) {
-            ${selector} {
-                ${content}
-            }
-        }`;
+        return `
+@media (-webkit-max-device-pixel-ratio: ${dppx}), (max-resolution: ${dppx}dppx) {
+    ${selector} {
+        ${content}
+    }
+}
+`;
     }
 }
 
@@ -40,7 +45,11 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
         if (!decls.length)
             return;
 
+        /**
+         * Core variable 0
+         */
         const oldBackground = CSSFruit.absorb(decls);
+        const oldBackgroundString = oldBackground.toString();
         if (!oldBackground.valid) {
             rule.warn(result, 'Invalid background');
             return;
@@ -49,126 +58,187 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
         if (!oldBackground.image)
             return;
 
-        let oldURLs;
-        let oldResolutions;
-        if (oldBackground.image._type === 'url')
-            oldURLs = [oldBackground.image];
-        else if (oldBackground.image._type === 'image-set') {
-            oldResolutions = Object.keys(oldBackground.image.values);
-            oldURLs = oldResolutions.map((key) => oldBackground.image.values[key]);
-        } else
-            return;
+        /**
+         * Core variable 1
+         */
+        const ruleItem = {
+            id: 'ID' + utils.genMD5(oldBackgroundString),
+            defaultResolution: '1x',
+        };
 
-        const checkURL = (url) => {
+        /**
+         * Core variable 2
+         */
+        const imageSet = [];
+        let oldResolutions;
+        if (oldBackground.image._type === 'url') {
+            imageSet.push({
+                url: oldBackground.image,
+                src: undefined,
+                resolution: undefined,
+                needSprite: false,
+                groupName: undefined,
+            });
+        } else if (oldBackground.image._type === 'image-set') {
+            oldResolutions = Object.keys(oldBackground.image.values);
+            oldResolutions.forEach((resolution) => {
+                imageSet.push({
+                    url: oldBackground.image.values[resolution],
+                    src: undefined,
+                    resolution,
+                    needSprite: false,
+                    groupName: undefined,
+                });
+            });
+        } else
+            return; // Other type like linear-gradient
+
+        // Check whether need sprite
+        const checkWhetherNeedSprite = (url) => {
             if (!url.path.endsWith('.png'))
                 return false;
-            if (options.filter === 'query') {
-                if (!(url.query && url.query[options.queryParam]))
-                    return false;
-            } else if (options.filter instanceof RegExp) {
-                if (!url.path.test(options.filter))
-                    return false;
-            } else if (options.filter !== 'all')
-                return false;
-            return true;
+            if (options.filter === 'query')
+                return !!(url.query && url.query[options.queryParam]);
+            else if (options.filter instanceof RegExp)
+                return url.path.test(options.filter);
+            else if (options.filter === 'all')
+                return true;
+            else
+                throw new TypeError(`Unknow filter value '${options.filter}'`);
         };
-        if (oldURLs.some((url) => !checkURL(url)))
+
+        let someNeedSprite = false;
+        imageSet.forEach((image) => {
+            image.needSprite = checkWhetherNeedSprite(image.url);
+            if (image.needSprite)
+                someNeedSprite = image.needSprite;
+        });
+
+        if (!someNeedSprite && !(oldBackground.image._type === 'image-set' && options.imageSetFallback))
             return;
 
-        promises.push(Promise.all(oldURLs.map((oldURL) => new Promise((resolve, reject) => {
-            loaderContext.resolve(loaderContext.context, oldURL.path, (err, result) => err ? reject(err) : resolve(result));
-        }))).then((filePaths) => {
-            // loaderContext.addDependency(filePath);
+        // Fill image object, add retina image in imageSet
+        if (oldBackground.image._type === 'url') {
+            const image = imageSet[0];
+            const query = image.url.query;
+            const baseGroupName = query && typeof query[options.queryParam] === 'string' ? query[options.queryParam] : options.defaultName;
+            image.src = image.url.path;
 
-            const ruleItem = {
-                id: 'ID' + utils.genMD5(oldBackground.toString()),
-                oldBackground,
-                blockSize: {
-                    width: undefined,
-                    height: undefined,
-                },
-                imageSet: {},
-            };
+            // According to query retina, collect image set
+            const pathRE = /(^.*?)(?:@(\d+x))?\.png$/;
+            const paramRE = /^retina@?(\d+x)$/;
+            const found = image.url.path.match(pathRE);
+            if (!found)
+                throw new Error('Error format of filePath');
+            let [, basePath, defaultResolution] = found;
+            if (!defaultResolution)
+                defaultResolution = '1x';
+            // 路径本身指示默认分辨率
+            image.groupName = baseGroupName;
+            image.resolution = ruleItem.defaultResolution = defaultResolution;
 
-            const query = oldURLs[0].query;
-            const baseGroupName = typeof query[options.queryParam] === 'string' ? query[options.queryParam] : options.defaultName;
+            Object.keys(query).forEach((param) => {
+                // @compat: old version
+                if (param === 'retina')
+                    param = 'retina@2x';
 
-            if (oldBackground.image._type === 'url') {
-                const filePath = filePaths[0];
-                // According to query retina, collect image set
-                const pathRE = /(^.*?)(?:@(\d+x))?\.png$/;
-                const paramRE = /^retina@?(\d+x)$/;
-                const found = filePath.match(pathRE);
+                const found = param.match(paramRE);
                 if (!found)
-                    throw new Error('Error format of filePath');
-                let [, basePath, defaultResolution] = found;
-                if (!defaultResolution)
-                    defaultResolution = '1x';
-                ruleItem.defaultResolution = defaultResolution;
-                // 默认的不一定为 sprite@1x.png，看用户使用情况
-                ruleItem.imageSet.default = filePath;
+                    return;
 
-                Object.keys(query).forEach((param) => {
-                    // @compat: old version
-                    if (param === 'retina')
-                        param = 'retina@2x';
-
-                    const found = param.match(paramRE);
-                    if (!found)
-                        return;
-
-                    const resolution = found[1];
-                    ruleItem.imageSet[resolution] = `${basePath}@${resolution}.png`;
+                const resolution = found[1];
+                const url = new URL(image.url.toString());
+                url.path = `${basePath}@${resolution}.png`;
+                imageSet.push({
+                    url,
+                    src: url.path,
+                    resolution,
+                    needSprite: image.needSprite,
+                    groupName: `${baseGroupName}@${resolution}`,
                 });
-            } else if (oldBackground.image._type === 'image-set') {
-                ruleItem.defaultResolution = oldResolutions[0];
-                ruleItem.imageSet.default = filePaths[0];
-
-                for (let i = 0; i < oldResolutions.length; i++)
-                    ruleItem.imageSet[oldResolutions[i]] = filePaths[i];
-            }
-
-            // Check width & height
-            rule.walkDecls((decl) => {
-                if (decl.prop === 'width')
-                    ruleItem.blockSize.width = decl.value;
-                else if (decl.prop === 'height')
-                    ruleItem.blockSize.height = decl.value;
             });
+        } else if (oldBackground.image._type === 'image-set') {
+            imageSet.forEach((image, index) => {
+                const query = image.url.query;
+                const baseGroupName = query && typeof query[options.queryParam] === 'string' ? query[options.queryParam] : options.defaultName;
+                image.src = image.url.path;
+                image.groupName = `${baseGroupName}@${image.resolution}`;
 
-            // Clean source decls
+                if (index === 0) {
+                    // 第一项指示默认分辨率
+                    image.groupName = baseGroupName;
+                    ruleItem.defaultResolution = image.resolution;
+                }
+            });
+        }
+
+        /**
+         * Core variable 3
+         */
+        const blockSize = {
+            width: undefined,
+            height: undefined,
+        };
+        // Check width & height
+        rule.walkDecls((decl) => {
+            if (decl.prop === 'width')
+                blockSize.width = decl.value;
+            else if (decl.prop === 'height')
+                blockSize.height = decl.value;
+        });
+
+        promises.push(Promise.all(imageSet.map((image) => new Promise((resolve, reject) => {
+            loaderContext.resolve(loaderContext.context, image.src, (err, result) => err ? reject(err) : resolve(result));
+        }))).then((filePaths) => {
+            // Clean decls in source
             decls.forEach((decl) => decl.remove());
-            Object.keys(ruleItem.imageSet).forEach((resolution) => {
-                let groupName = baseGroupName;
+
+            const outputs = [];
+            filePaths.forEach((filePath, index) => {
+                if (!filePath)
+                    throw new Error(`Cannot resolve file path '${imageSet[index].src}'`);
+                loaderContext.addDependency(filePath);
+
+                const image = imageSet[index];
                 const groupItem = {
                     id: ruleItem.id,
-                    filePath: ruleItem.imageSet[resolution],
+                    groupName: image.groupName,
+                    filePath,
                     oldBackground,
-                    blockSize: ruleItem.blockSize,
-                    resolution,
+                    blockSize,
+                    resolution: image.resolution,
                     content: undefined, // new background cached
                 };
 
-                if (resolution === 'default' || resolution === ruleItem.defaultResolution) {
-                    rule.append({ prop: 'background', value: `${meta.REPLACER_NAME}(${groupName}, ${groupItem.id})` });
+                let content = `${meta.REPLACER_NAME}(${image.groupName}, ${groupItem.id})`;
+                if (image.needSprite) {
+                    if (!data[image.groupName])
+                        data[image.groupName] = {};
+                    // background 的各种内容没变，id 一定不会变
+                    if (!data[image.groupName][groupItem.id])
+                        data[image.groupName][groupItem.id] = groupItem;
                 } else {
-                    groupName += '@' + resolution;
-                    // No problem in async function
-                    rule.after(genMediaQuery(resolution, ruleItem.defaultResolution, rule.selector, `background: ${meta.REPLACER_NAME}(${groupName}, ${groupItem.id});`));
+                    const background = new Background(oldBackgroundString);
+                    background.image = image.url;
+                    content = background.toString();
                 }
 
-                if (!data[groupName])
-                    data[groupName] = {};
-                // background 的各种内容没变，id 一定不会变
-                if (!data[groupName][groupItem.id])
-                    data[groupName][groupItem.id] = groupItem;
+                if (image.resolution === ruleItem.defaultResolution)
+                    rule.append({ prop: 'background', value: content });
+                else {
+                    // No problem in async function
+                    outputs.push(genMediaQuery(image.resolution, ruleItem.defaultResolution, rule.selector, `background: ${content};`));
+                }
             });
+
+            if (outputs.length)
+                rule.after(outputs.join(''));
         }));
     });
 
     if (promises.length) {
         plugin.shouldGenerate = true;
-        loaderContext._module.isCSSSpriteModule = true;
+        loaderContext._module[meta.MODULE_MARK] = true;
     }
 
     return Promise.all(promises);

@@ -29,7 +29,7 @@ function checkBackgroundPosition(position) {
  * @param {no units} spriteSize
  * @param {number} dppx
  */
-module.exports = function computeNewBackground(oldBackground, url, blockSize, imageDimension, spriteSize) {
+module.exports = function computeNewBackground(oldBackground, url, blockSize, imageDimension, spriteSize, dppx) {
     const background = new Background();
     background.color = oldBackground.color;
     background.repeat = 'no-repeat';
@@ -37,9 +37,9 @@ module.exports = function computeNewBackground(oldBackground, url, blockSize, im
     // background.clip
     // background.origin
     // background.attachment
-
     background.valid = true;
 
+    // background-position
     if (oldBackground.position === undefined)
         oldBackground.position = new BackgroundPosition('0px 0px');
     else
@@ -48,9 +48,15 @@ module.exports = function computeNewBackground(oldBackground, url, blockSize, im
     background.position.x.offset.number = oldBackground.position.x.offset.number - imageDimension.x;
     background.position.y.offset.number = oldBackground.position.y.offset.number - imageDimension.y;
 
-    if (String(oldBackground.size) === 'auto')
-        oldBackground.size = undefined;
-    if (oldBackground.size) {
+    // background-size
+    let oldSize = oldBackground.size;
+    if (String(oldSize) === 'auto')
+        oldSize = undefined;
+    if (!oldSize && dppx !== 1) {
+        oldSize = new BackgroundSize(imageDimension.width / dppx + 'px' + ' ' + imageDimension.height / dppx + 'px');
+    }
+
+    if (oldSize) { // Don't process 'auto'
         blockSize = new BackgroundSize(blockSize.width + ' ' + blockSize.height);
 
         const spriteRadio = {
@@ -70,39 +76,39 @@ module.exports = function computeNewBackground(oldBackground, url, blockSize, im
          * | contain | auto 100%            | 100% auto           |
          */
 
-        if ((oldBackground.size.toString() === 'cover' && blockWHRatio >= imageWHRatio)
-            || (oldBackground.size.toString() === 'contain' && blockWHRatio < imageWHRatio)) {
-            oldBackground.size = new BackgroundSize('100% auto');
+        if ((oldSize.toString() === 'cover' && blockWHRatio >= imageWHRatio)
+            || (oldSize.toString() === 'contain' && blockWHRatio < imageWHRatio)) {
+            oldSize = new BackgroundSize('100% auto');
         }
-        if ((oldBackground.size.toString() === 'cover' && blockWHRatio < imageWHRatio)
-            || (oldBackground.size.toString() === 'contain' && blockWHRatio >= imageWHRatio)) {
-            oldBackground.size = new BackgroundSize('auto 100%');
+        if ((oldSize.toString() === 'cover' && blockWHRatio < imageWHRatio)
+            || (oldSize.toString() === 'contain' && blockWHRatio >= imageWHRatio)) {
+            oldSize = new BackgroundSize('auto 100%');
         }
 
         // Handle case of width
-        if (oldBackground.size.width._type === 'percentage') {
+        if (oldSize.width._type === 'percentage') {
             checkBlockSize(blockSize);
-            spriteRadio.x = blockSize.width.number * oldBackground.size.width.number * 0.01 / imageDimension.width;
-        } else if (oldBackground.size.width._type === 'length') {
-            if (oldBackground.size.width.unit !== 'px')
+            spriteRadio.x = blockSize.width.number * oldSize.width.number * 0.01 / imageDimension.width;
+        } else if (oldSize.width._type === 'length') {
+            if (oldSize.width.unit !== 'px')
                 throw new Error(`Only support px-unit or percentage in 'background-size'`);
-            spriteRadio.x = oldBackground.size.width.number / imageDimension.width;
+            spriteRadio.x = oldSize.width.number / imageDimension.width;
         }
 
         // Handle case of height
-        if (oldBackground.size.height._type === 'percentage') {
+        if (oldSize.height._type === 'percentage') {
             checkBlockSize(blockSize);
-            spriteRadio.y = blockSize.height.number * oldBackground.size.height.number * 0.01 / imageDimension.height;
-        } else if (oldBackground.size.height._type === 'length') {
-            if (oldBackground.size.height.unit !== 'px')
+            spriteRadio.y = blockSize.height.number * oldSize.height.number * 0.01 / imageDimension.height;
+        } else if (oldSize.height._type === 'length') {
+            if (oldSize.height.unit !== 'px')
                 throw new Error(`Only support px-unit or percentage in 'background-size'`);
-            spriteRadio.y = oldBackground.size.height.number / imageDimension.height;
+            spriteRadio.y = oldSize.height.number / imageDimension.height;
         }
 
         // Handle case of auto
-        if (oldBackground.size.width === 'auto')
+        if (oldSize.width === 'auto')
             spriteRadio.x = spriteRadio.y;
-        else if (oldBackground.size.height === 'auto')
+        else if (oldSize.height === 'auto')
             spriteRadio.y = spriteRadio.x;
 
         background.size = new BackgroundSize(
@@ -110,8 +116,8 @@ module.exports = function computeNewBackground(oldBackground, url, blockSize, im
             (spriteSize.height * spriteRadio.y).toFixed(0) + 'px',
         );
 
-        background.position.x.offset.number = oldBackground.position.x.offset.number - imageDimension.x * spriteRadio.x;
-        background.position.y.offset.number = oldBackground.position.y.offset.number - imageDimension.y * spriteRadio.y;
+        background.position.x.offset.number = oldBackground.position.x.offset.number - (imageDimension.x * spriteRadio.x).toFixed(0);
+        background.position.y.offset.number = oldBackground.position.y.offset.number - (imageDimension.y * spriteRadio.y).toFixed(0);
     }
 
     return background;

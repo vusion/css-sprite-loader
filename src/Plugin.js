@@ -21,6 +21,7 @@ class CSSSpritePlugin extends BasePlugin {
             queryParam: 'sprite',
             defaultName: 'sprite',
             filter: 'query',
+            imageSetFallback: false,
             plugins: [],
         }, options);
         // this.spriteSmith =
@@ -68,6 +69,7 @@ class CSSSpritePlugin extends BasePlugin {
                             item.blockSize,
                             coordinates[item.filePath],
                             result.properties,
+                            +item.resolution.slice(0, -1),
                         );
                         background.valid = true;
                         const content = background.toString();

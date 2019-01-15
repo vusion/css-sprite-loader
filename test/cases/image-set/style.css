@@ -21,12 +21,12 @@ body {
 .source.image-set {
     width: 128px;
     height: 128px;
-    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
 }
 .sprite.image-set {
     width: 128px;
     height: 128px;
-    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
 }
 
 .source.image-set-fallback {
@@ -47,7 +47,7 @@ body {
     height: 150px;
     background: url('../../fixtures/images/retina/angry-birds.png');
     background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
-    background-size: 80%;
+    background-size: 120%;
     background-position: 30px 20px;
     background-repeat: no-repeat;
 }
@@ -56,18 +56,46 @@ body {
     height: 150px;
     background: url('../../fixtures/images/retina/angry-birds.png?sprite');
     background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
-    background-size: 80%;
+    background-size: 120%;
     background-position: 30px 20px;
 }
-.source.image-set-captain-america {
+
+.source.image-default-resolution {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/minion@3x.png') 3x,
+        url('../../fixtures/images/retina/minion.png') 1x,
+        url('../../fixtures/images/retina/minion@2x.png') 2x
+    );
+}
+.sprite.image-default-resolution {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/minion@3x.png?sprite') 3x
+        url('../../fixtures/images/retina/minion.png?sprite') 1x,
+        url('../../fixtures/images/retina/minion@2x.png?sprite') 2x,
+    );
+}
+
+.source.image-set-different {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/captain-america.png');
-    background: -webkit-image-set(url('../../fixtures/images/retina/captain-america.png') 1x, url('../../fixtures/images/retina/captain-america@2x.png') 2x);
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/captain-america.png') 1x,
+        url('../../fixtures/images/retina/captain-america@2x.png') 2x,
+        url('../../fixtures/images/retina/captain-america@3x.png') 3x
+    );
 }
-.sprite.image-set-captain-america {
+.sprite.image-set-different {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/captain-america.png?sprite');
-    background: -webkit-image-set(url('../../fixtures/images/retina/captain-america.png?sprite') 1x, url('../../fixtures/images/retina/captain-america@2x.png?sprite') 2x);
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/captain-america.png?sprite') 1x,
+        url('../../fixtures/images/retina/captain-america@2x.png?sprite=other-sprite') 2x,
+        url('../../fixtures/images/retina/captain-america@3x.png') 3x
+    );
 }

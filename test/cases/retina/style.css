@@ -43,7 +43,6 @@ body {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/angry-birds@2x.png?sprite&retina@1x');
-    background-size: 100%;
 }
 
 .source.retina4x {
@@ -56,7 +55,6 @@ body {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/angry-birds.png?sprite&retina&retina@3x&retina@4x');
-    background-size: 100%;
 }
 
 .source.simple-2 {
