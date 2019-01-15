@@ -35,8 +35,8 @@
     "loader"
   ],
   "dependencies": {
-    "base-css-image-loader": "^0.2.0",
-    "css-fruit": "^0.1.2",
+    "base-css-image-loader": "^0.2.1",
+    "css-fruit": "^0.1.3",
     "postcss": "^6.0.16",
     "spritesmith": "^3.2.1"
   },
