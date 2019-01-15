@@ -1,9 +1,18 @@
-.source.without-image-set {
+body {
+    margin: 0;
+}
+
+.part {
+    display: inline-block;
+    width: 50%;
+}
+
+.source.simple {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/angry-birds.png');
 }
-.sprite.without-image-set {
+.sprite.simple {
     width: 128px;
     height: 128px;
     background: url('../../fixtures/images/retina/angry-birds.png?sprite');
@@ -33,7 +42,7 @@
     background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
 }
 
-.source.image-set-and-others {
+.source.image-set-and-other-things {
     width: 100px;
     height: 150px;
     background: url('../../fixtures/images/retina/angry-birds.png');
@@ -42,7 +51,7 @@
     background-position: 30px 20px;
     background-repeat: no-repeat;
 }
-.sprite.image-set-and-others {
+.sprite.image-set-and-other-things {
     width: 100px;
     height: 150px;
     background: url('../../fixtures/images/retina/angry-birds.png?sprite');

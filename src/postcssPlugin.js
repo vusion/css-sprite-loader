@@ -5,7 +5,7 @@ const CSSFruit = require('css-fruit').default;
 CSSFruit.config({
     forceParsing: {
         url: true,
-        imageSet: true,
+        'image-set': true,
         length: true,
         percentage: true,
     },
@@ -29,13 +29,13 @@ function genMediaQuery(resolution, defaultResolution, selector, content) {
     }
 }
 
-module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (root, result) => {
+module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (styles, result) => {
     const promises = [];
     const plugin = loaderContext[meta.PLUGIN_NAME];
     const options = plugin.options;
     const data = plugin.data;
 
-    root.walkRules((rule) => {
+    styles.walkRules((rule) => {
         const decls = rule.nodes.filter((node) => node.type === 'decl' && node.prop.startsWith('background'));
         if (!decls.length)
             return;
@@ -54,8 +54,8 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
         if (oldBackground.image._type === 'url')
             oldURLs = [oldBackground.image];
         else if (oldBackground.image._type === 'image-set') {
-            oldResolutions = Object.keys(oldBackground.image.resolutions);
-            oldURLs = oldResolutions.map((key) => oldBackground.image.resolutions[key]);
+            oldResolutions = Object.keys(oldBackground.image.values);
+            oldURLs = oldResolutions.map((key) => oldBackground.image.values[key]);
         } else
             return;
 
