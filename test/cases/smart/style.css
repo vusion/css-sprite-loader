@@ -1,0 +1,119 @@
+body {
+    margin: 0;
+}
+
+.part {
+    display: inline-block;
+    width: 50%;
+}
+
+.source.simple {
+    height: 200px;
+    background: url('../../fixtures/images/retina/angry-birds.png') no-repeat;
+}
+.sprite.simple {
+    height: 200px;
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite') no-repeat;
+}
+
+.source.no-width {
+    height: 200px;
+    background: image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x) no-repeat;
+}
+.sprite.no-width {
+    height: 200px;
+    background: image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x) no-repeat;
+}
+
+.source.background-size {
+    height: 200px;
+    background: image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x) no-repeat;
+    background-size: 50%;
+}
+.sprite.background-size {
+    height: 200px;
+    background: image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x) no-repeat;
+    background-size: 50%;
+}
+
+/* .source.image-set-prefix {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
+}
+.sprite.image-set-prefix {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
+}
+
+.source.image-set-fallback {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds.png');
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
+}
+.sprite.image-set-fallback {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite');
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
+}
+
+.source.image-set-and-other-things {
+    width: 100px;
+    height: 150px;
+    background: url('../../fixtures/images/retina/angry-birds.png');
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png') 1x, url('../../fixtures/images/retina/angry-birds@2x.png') 2x);
+    background-size: 120%;
+    background-position: 30px 20px;
+    background-repeat: no-repeat;
+}
+.sprite.image-set-and-other-things {
+    width: 100px;
+    height: 150px;
+    background: url('../../fixtures/images/retina/angry-birds.png?sprite');
+    background: -webkit-image-set(url('../../fixtures/images/retina/angry-birds.png?sprite') 1x, url('../../fixtures/images/retina/angry-birds@2x.png?sprite') 2x);
+    background-size: 120%;
+    background-position: 30px 20px;
+}
+
+.source.image-default-resolution {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/minion@3x.png') 3x,
+        url('../../fixtures/images/retina/minion.png') 1x,
+        url('../../fixtures/images/retina/minion@2x.png') 2x
+    );
+}
+.sprite.image-default-resolution {
+    width: 128px;
+    height: 128px;
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/minion@3x.png?sprite') 3x
+        url('../../fixtures/images/retina/minion.png?sprite') 1x,
+        url('../../fixtures/images/retina/minion@2x.png?sprite') 2x,
+    );
+}
+
+.source.image-set-different {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/captain-america.png');
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/captain-america.png') 1x,
+        url('../../fixtures/images/retina/captain-america@2x.png') 2x,
+        url('../../fixtures/images/retina/captain-america@3x.png') 3x
+    );
+}
+.sprite.image-set-different {
+    width: 128px;
+    height: 128px;
+    background: url('../../fixtures/images/retina/captain-america.png?sprite');
+    background: -webkit-image-set(
+        url('../../fixtures/images/retina/captain-america.png?sprite') 1x,
+        url('../../fixtures/images/retina/captain-america@2x.png?sprite=other-sprite') 2x,
+        url('../../fixtures/images/retina/captain-america@3x.png') 3x
+    );
+} */
