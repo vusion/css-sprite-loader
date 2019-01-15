@@ -5,6 +5,7 @@ const CSSFruit = require('css-fruit').default;
 CSSFruit.config({
     forceParsing: {
         url: true,
+        imageSet: true,
         length: true,
         percentage: true,
     },
@@ -47,21 +48,37 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
 
         if (!oldBackground.image)
             return;
-        if (!oldBackground.image.path.endsWith('.png'))
-            return;
-        if (options.filter === 'query') {
-            if (!(oldBackground.image.query && oldBackground.image.query[options.queryParam]))
-                return;
-        } else if (options.filter instanceof RegExp) {
-            if (!oldBackground.image.path.test(options.filter))
-                return;
-        } else if (options.filter !== 'all')
+
+        let oldURLs;
+        let oldResolutions;
+        if (oldBackground.image._type === 'url')
+            oldURLs = [oldBackground.image];
+        else if (oldBackground.image._type === 'image-set') {
+            oldResolutions = Object.keys(oldBackground.image.resolutions);
+            oldURLs = oldResolutions.map((key) => oldBackground.image.resolutions[key]);
+        } else
             return;
 
-        promises.push(new Promise((resolve, reject) => {
-            loaderContext.resolve(loaderContext.context, oldBackground.image.path, (err, result) => err ? reject(err) : resolve(result));
-        }).then((filePath) => {
-            loaderContext.addDependency(filePath);
+        const checkURL = (url) => {
+            if (!url.path.endsWith('.png'))
+                return false;
+            if (options.filter === 'query') {
+                if (!(url.query && url.query[options.queryParam]))
+                    return false;
+            } else if (options.filter instanceof RegExp) {
+                if (!url.path.test(options.filter))
+                    return false;
+            } else if (options.filter !== 'all')
+                return false;
+            return true;
+        };
+        if (oldURLs.some((url) => !checkURL(url)))
+            return;
+
+        promises.push(Promise.all(oldURLs.map((oldURL) => new Promise((resolve, reject) => {
+            loaderContext.resolve(loaderContext.context, oldURL.path, (err, result) => err ? reject(err) : resolve(result));
+        }))).then((filePaths) => {
+            // loaderContext.addDependency(filePath);
 
             const ruleItem = {
                 id: 'ID' + utils.genMD5(oldBackground.toString()),
@@ -73,34 +90,43 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
                 imageSet: {},
             };
 
-            const query = oldBackground.image.query;
+            const query = oldURLs[0].query;
             const baseGroupName = typeof query[options.queryParam] === 'string' ? query[options.queryParam] : options.defaultName;
 
-            // According to query retina, collect image set
-            const pathRE = /(^.*?)(?:@(\d+x))?\.png$/;
-            const paramRE = /^retina@?(\d+x)$/;
-            const found = filePath.match(pathRE);
-            if (!found)
-                throw new Error('Error format of filePath');
-            let [, basePath, defaultResolution] = found;
-            if (!defaultResolution)
-                defaultResolution = '1x';
-            ruleItem.defaultResolution = defaultResolution;
-            // 默认的不一定为 sprite@1x.png，看用户使用情况
-            ruleItem.imageSet.default = filePath;
-
-            Object.keys(query).forEach((param) => {
-                // @compat: old version
-                if (param === 'retina')
-                    param = 'retina@2x';
-
-                const found = param.match(paramRE);
+            if (oldBackground.image._type === 'url') {
+                const filePath = filePaths[0];
+                // According to query retina, collect image set
+                const pathRE = /(^.*?)(?:@(\d+x))?\.png$/;
+                const paramRE = /^retina@?(\d+x)$/;
+                const found = filePath.match(pathRE);
                 if (!found)
-                    return;
+                    throw new Error('Error format of filePath');
+                let [, basePath, defaultResolution] = found;
+                if (!defaultResolution)
+                    defaultResolution = '1x';
+                ruleItem.defaultResolution = defaultResolution;
+                // 默认的不一定为 sprite@1x.png，看用户使用情况
+                ruleItem.imageSet.default = filePath;
 
-                const resolution = found[1];
-                ruleItem.imageSet[resolution] = `${basePath}@${resolution}.png`;
-            });
+                Object.keys(query).forEach((param) => {
+                    // @compat: old version
+                    if (param === 'retina')
+                        param = 'retina@2x';
+
+                    const found = param.match(paramRE);
+                    if (!found)
+                        return;
+
+                    const resolution = found[1];
+                    ruleItem.imageSet[resolution] = `${basePath}@${resolution}.png`;
+                });
+            } else if (oldBackground.image._type === 'image-set') {
+                ruleItem.defaultResolution = oldResolutions[0];
+                ruleItem.imageSet.default = filePaths[0];
+
+                for (let i = 0; i < oldResolutions.length; i++)
+                    ruleItem.imageSet[oldResolutions[i]] = filePaths[i];
+            }
 
             // Check width & height
             rule.walkDecls((decl) => {
@@ -123,12 +149,12 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (roo
                     content: undefined, // new background cached
                 };
 
-                if (resolution === 'default' || resolution === defaultResolution) {
+                if (resolution === 'default' || resolution === ruleItem.defaultResolution) {
                     rule.append({ prop: 'background', value: `${meta.REPLACER_NAME}(${groupName}, ${groupItem.id})` });
                 } else {
                     groupName += '@' + resolution;
                     // No problem in async function
-                    rule.after(genMediaQuery(resolution, defaultResolution, rule.selector, `background: ${meta.REPLACER_NAME}(${groupName}, ${groupItem.id});`));
+                    rule.after(genMediaQuery(resolution, ruleItem.defaultResolution, rule.selector, `background: ${meta.REPLACER_NAME}(${groupName}, ${groupItem.id});`));
                 }
 
                 if (!data[groupName])
