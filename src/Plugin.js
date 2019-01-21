@@ -24,7 +24,6 @@ class CSSSpritePlugin extends BasePlugin {
             imageSetFallback: false,
             plugins: [],
         }, options);
-        // this.spriteSmith =
         this.data = {}; // { [group: string]: { [md5: string]: { id: string, oldBackground: Background } } }
     }
     apply(compiler) {

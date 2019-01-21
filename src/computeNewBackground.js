@@ -20,7 +20,8 @@ function checkBackgroundPosition(position) {
 }
 
 /**
- *
+ * 根据原有块中的背景属性值、块的大小、原有图片本身大小、生成雪碧图的大小、分辨率要求，计算出新背景的各种属性值
+ * 这个函数很复杂，写哭了。。😭
  * @param {Background} oldBackground
  * @param {no units} oldBlockSize
  * @param {no units} imageDimension
@@ -37,7 +38,11 @@ module.exports = function computeNewBackground(oldBackground, url, oldBlockSize,
     // background.attachment
     background.valid = true;
 
-    // background-position
+    /**
+     * background-position
+     * 检查原有的 background-position，没有的话按'0px 0px'计算
+     * 必须用像素值，否则报错
+     */
     if (oldBackground.position === undefined)
         oldBackground.position = new BackgroundPosition('0px 0px');
     else
@@ -46,13 +51,20 @@ module.exports = function computeNewBackground(oldBackground, url, oldBlockSize,
     background.position.x.offset.number = oldBackground.position.x.offset.number - imageDimension.x;
     background.position.y.offset.number = oldBackground.position.y.offset.number - imageDimension.y;
 
-    // background-size
+    /**
+     * background-size
+     * 检查原有的 background-size，没有的话按图片本身大小/分辨率来计算
+     */
     let oldSize = oldBackground.size;
     if (String(oldSize) === 'auto')
         oldSize = undefined;
     if (!oldSize && dppx !== 1)
         oldSize = new BackgroundSize(imageDimension.width / dppx + 'px' + ' ' + imageDimension.height / dppx + 'px');
 
+    /**
+     * blockSize
+     * 检查原有块的大小，没有或不明确的按图片本身大小/分辨率来计算（这是猜测，可能有偏差）
+     */
     let blockSize = new BackgroundSize(oldBlockSize.width + ' ' + oldBlockSize.height);
     if (!checkBlockSize(blockSize))
         blockSize = new BackgroundSize(imageDimension.width / dppx + 'px' + ' ' + imageDimension.height / dppx + 'px');
