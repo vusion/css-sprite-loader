@@ -206,11 +206,11 @@ This will be converted to
 > **NOTE**
 > Here, the original image path corresponding to `retina@1x` should be explicitly named `xxx@1x`, and finally it will be packed into `sprite@1x`.
 
-#### image-set
+#### image-set function
 
-`image-set` function is another way to set different resolution images.
+Image-set function is another way to set different resolution images.
 
-`image-set()` feature is in [Stage 2](https://www.w3.org/TR/css-images-4/#image-set-notation). Here is [Browsers Compatibility](https://developer.mozilla.org/en-US/docs/Web/CSS/image-set#Browser_compatibility). In this loader, it will be processed by PostCSS.
+Image-set function feature is in [Stage 2](https://www.w3.org/TR/css-images-4/#image-set-notation). Here is [Browsers Compatibility](https://developer.mozilla.org/en-US/docs/Web/CSS/image-set#Browser_compatibility). In this loader, it will be processed by PostCSS.
 
 > **NOTE**
 > If you want to use this feature, make sure that `image-set` won't be processed before css-sprite-loader. For example, before this loader, there is a postcss-loader and plugin of it `postcss-preset-env` willing polyfill `image-set`. You can disable it by setting options like:

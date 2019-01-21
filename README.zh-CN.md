@@ -191,11 +191,11 @@ images/
 > **注意**：
 > 这里的`retina@1x`对应的原始图片路径要显式命名为`xxx@1x`，最后会被打入到`sprite@1x`当中。
 
-#### image-set
+#### image-set function
 
-也可以用`image-set`函数来设置不同分辨率的 retina 图片。
+也可以用 image-set 函数来设置不同分辨率的 retina 图片。
 
-`image-set`函数这一特性目前处于[Stage 2](https://www.w3.org/TR/css-images-4/#image-set-notation)，[浏览器的兼容情况](https://developer.mozilla.org/en-US/docs/Web/CSS/image-set#Browser_compatibility)在这里，但我们用 PostCSS 做了支持。
+image-set 函数这一特性目前处于[Stage 2](https://www.w3.org/TR/css-images-4/#image-set-notation)，[浏览器的兼容情况](https://developer.mozilla.org/en-US/docs/Web/CSS/image-set#Browser_compatibility)在这里，但我们用 PostCSS 做了支持。
 
 > **注意**：
 > 要使用这个特性，在 css-sprite-loader 之前不能提前将 image-set 做降级处理。例如之前有`postcss-preset-env`，可以将它的选项设置为：
