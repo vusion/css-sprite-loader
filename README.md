@@ -41,7 +41,7 @@ Then `css-sprite-loader` will generate a sprite image.
 
 Our loader works in a way different to others:
 
-- Easy to toggle whether use sprite or not by specifying path query.
+- Easy to toggle whether to use sprite or not by specifying path query.
 - Fully support css `background` property, includes `background-position`, `background-size` and others. Make sure there are same effect before and after handling. For example:
 
 ``` css
@@ -95,7 +95,7 @@ module.exports = {
 
 #### sprite param
 
-Whether pack this image into sprite. Or set which sprite group to pack. For example:
+Whether to pack this image into sprite. Or set which sprite group to pack. For example:
 
 ``` css
 .foo {
@@ -121,7 +121,7 @@ images will be packed into two sprites.
 
 #### retina@2x, retina@3x, retina@4x, ...
 
-Whether use retina images in some resolution. For example, if you have a directory:
+Whether to use retina images in some resolution. For example, if you have a directory:
 
 ```
 images/
@@ -367,7 +367,7 @@ Customize key of query param in svg path. Only works when `filter: 'query'`.
 
 #### imageSetFallback
 
-Whether process images without sprite query in `image-set`. They may be no need to polyfill because some browsers already support `-webkit-image-set`.
+Whether to process images without sprite query in `image-set`. They may be no need to polyfill because some browsers already support `-webkit-image-set`.
 
 - Type: `boolean`
 - Default: `false`

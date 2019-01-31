@@ -3,7 +3,7 @@ const { Background, BackgroundPosition, BackgroundSize, Percentage, Length } = r
 function checkBlockSize(blockSize) {
     if (!blockSize.valid)
         return false;
-    if (!blockSize.width || blockSize.height)
+    if (!blockSize.width || !blockSize.height)
         return false;
     return (blockSize.width.toString() === '0' || blockSize.width.unit === 'px')
         && (blockSize.height.toString() === '0' || blockSize.height.unit === 'px');
