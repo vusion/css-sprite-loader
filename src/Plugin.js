@@ -26,6 +26,7 @@ class CSSSpritePlugin extends BasePlugin {
         }, options);
         this.data = {}; // { [group: string]: { [md5: string]: { id: string, oldBackground: Background } } }
     }
+
     apply(compiler) {
         this.plugin(compiler, 'thisCompilation', (compilation, params) => {
             this.plugin(compilation, 'optimizeTree', (chunks, modules, callback) => this.optimizeTree(compilation, chunks, modules, callback));
