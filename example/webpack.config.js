@@ -1,4 +1,4 @@
-const CSSSpritePlugin = require('../../index').Plugin;
+const CSSSpritePlugin = require('../index').Plugin;
 
 module.exports = {
     entry: {
@@ -11,7 +11,7 @@ module.exports = {
     },
     module: {
         rules: [
-            { test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../../index')] },
+            { test: /\.css$/, use: ['style-loader', 'css-loader', require.resolve('../index')] },
             { test: /\.png$/, use: ['file-loader'] },
         ],
     },

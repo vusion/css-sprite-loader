@@ -4,6 +4,8 @@
 
 这是一款可以自动将 PNG 图片合并成雪碧图的 Webpack loader。
 
+![screenshot](./examples/example1/screenshot.png)
+
 ## 示例
 
 给需要合并的背景图添加 sprite 后缀参数：
@@ -21,8 +23,6 @@ css-sprite-loader 会自动生成雪碧图：
     background: url(dest/sprite.png?5d40e339682970eb14baf6110a83ddde) -100px 0 no-repeat;
 }
 ```
-
-![screenshot](./examples/example1/screenshot.png)
 
 ## 特性
 

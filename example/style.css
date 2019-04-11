@@ -10,32 +10,32 @@ body {
 }
 
 .source, .sprite {
-    border: 1px solid #dfe4ec;
+    border: 1px dashed #dfe4ec;
 }
 
 .source.retina2x {
     width: 128px;
     height: 128px;
-    background: url('../../test/fixtures/images/retina/angry-birds@2x.png');
+    background: url('../test/fixtures/images/retina/angry-birds@2x.png');
     background-size: 100%;
 }
 .sprite.retina2x {
     width: 128px;
     height: 128px;
-    background: url('../../test/fixtures/images/retina/angry-birds@2x.png?sprite&retina@1x');
+    background: url('../test/fixtures/images/retina/angry-birds@2x.png?sprite&retina@1x');
 }
 
 .source.retina-2 {
     width: 128px;
     height: 128px;
-    background: url('../../test/fixtures/images/retina/captain-america@2x.png') no-repeat;
+    background: url('../test/fixtures/images/retina/captain-america@2x.png') no-repeat;
     background-size: 80%;
     background-position: 30px 20px;
 }
 .sprite.retina-2 {
     width: 128px;
     height: 128px;
-    background: url('../../test/fixtures/images/retina/captain-america.png?sprite&retina') no-repeat;
+    background: url('../test/fixtures/images/retina/captain-america.png?sprite&retina') no-repeat;
     background-size: 80%;
     background-position: 30px 20px;
 }
@@ -43,27 +43,27 @@ body {
 .source.bg-position-outside {
     width: 128px;
     height: 128px;
-    background: url('../../test/fixtures/images/tag.png') no-repeat;
+    background: url('../test/fixtures/images/tag.png') no-repeat;
     background-position: 30px -20px;
 }
 .sprite.bg-position-outside {
     width: 128px;
     height: 128px;
-    background: url('../../test/fixtures/images/tag.png?sprite') no-repeat;
+    background: url('../test/fixtures/images/tag.png?sprite') no-repeat;
     background-position: 30px -20px;
 }
 
 .source.bg-position-and-size-outside {
     width: 200px;
     height: 128px;
-    background: url('../../test/fixtures/images/html.png') no-repeat;
+    background: url('../test/fixtures/images/html.png') no-repeat;
     background-size: 200px 100px;
     background-position: 30px 20px;
 }
 .sprite.bg-position-and-size-outside {
     width: 200px;
     height: 128px;
-    background: url('../../test/fixtures/images/html.png?sprite') no-repeat;
+    background: url('../test/fixtures/images/html.png?sprite') no-repeat;
     background-size: 200px 100px;
     background-position: 30px 20px;
 }
