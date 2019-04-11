@@ -4,7 +4,7 @@
 
 这是一款可以自动将 PNG 图片合并成雪碧图的 Webpack loader。
 
-![screenshot](./examples/example1/screenshot.png)
+![screenshot](./example/screenshot.png)
 
 ## 示例
 

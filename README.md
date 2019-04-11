@@ -18,7 +18,7 @@ Webpack loader for creating PNG sprites.
 [download-img]: https://img.shields.io/npm/dm/css-sprite-loader.svg?style=flat-square
 [download-url]: https://npmjs.org/package/css-sprite-loader
 
-![screenshot](./examples/example1/screenshot.png)
+![screenshot](./example/screenshot.png)
 
 ## Example
 
