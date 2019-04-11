@@ -22,6 +22,8 @@ css-sprite-loader 会自动生成雪碧图：
 }
 ```
 
+![screenshot](./examples/example1/screenshot.png)
+
 ## 特性
 
 与别的类似的雪碧图加载器不同的是：
