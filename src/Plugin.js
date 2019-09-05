@@ -75,7 +75,10 @@ class CSSSpritePlugin extends BasePlugin {
                         const content = background.toString();
 
                         // @TODO: Should process in postcssPlugin?
-                        return postcss(this.options.plugins).process(`background: ${content};`).then((result) => {
+                        return postcss(this.options.plugins).process(`background: ${content};`, {
+                            from: undefined,
+                            to: undefined,
+                        }).then((result) => {
                             item.content = result.root.nodes[0].value;
                         });
                     });
