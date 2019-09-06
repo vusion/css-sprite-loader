@@ -60,7 +60,7 @@ class CSSSpritePlugin extends BasePlugin {
                     };
 
                     const coordinates = result.coordinates;
-                    keys.forEach((key) => {
+                    return Promise.all(keys.map((key) => {
                         const item = group[key];
                         // Add new background according to result of sprite
                         const background = computeNewBackground(
@@ -81,7 +81,7 @@ class CSSSpritePlugin extends BasePlugin {
                         }).then((result) => {
                             item.content = result.root.nodes[0].value;
                         });
-                    });
+                    }));
                 });
         });
 
