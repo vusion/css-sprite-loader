@@ -108,7 +108,7 @@ module.exports = postcss.plugin('css-sprite-parser', ({ loaderContext }) => (sty
             if (options.filter === 'query')
                 return !!(url.query && url.query[options.queryParam]);
             else if (options.filter instanceof RegExp)
-                return url.path.test(options.filter);
+                return options.filter.test(url.path);
             else if (options.filter === 'all')
                 return true;
             else
