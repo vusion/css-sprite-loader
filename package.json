@@ -9,7 +9,8 @@
   "scripts": {
     "precommit": "node node_modules/vusion-hooks/precommit",
     "test": "mocha --timeout 5000 ./test/final.test.js",
-    "testnode": "node ./test/final.test.js",
+    "test:default": "mocha --timeout 5000 ./test/default.test.js",
+    "test:retina": "mocha --timeout 5000 ./test/retina.test.js",
     "eslint": "eslint ./src --fix"
   },
   "main": "./index.js",
@@ -35,7 +36,7 @@
     "loader"
   ],
   "dependencies": {
-    "base-css-image-loader": "^0.2.2",
+    "base-css-image-loader": "^0.2.7",
     "css-fruit": "^0.1.3",
     "postcss": "^6.0.23",
     "spritesmith": "^3.2.1"
@@ -55,11 +56,12 @@
     "postcss-px-to-viewport": "^0.0.3",
     "postcss-viewport-units": "^0.1.4",
     "puppeteer": "^1.7.0",
-    "shelljs": "^0.7.8",
+    "shelljs": "^0.8.4",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
     "vusion-hooks": "^0.2.1",
-    "webpack": "^3.11.0",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^2.7.1"
   }
 }

@@ -1,26 +1,12 @@
-const fs = require('fs');
 const path = require('path');
-const webpack = require('webpack');
+const runWebpack = require('base-css-image-loader/test/fixtures/runWebpack');
 
-const testCase = ['retina', 'default'];
+const cases = ['background', 'image-set', 'postcss-plugins', 'public-path', 'smart'];
 
-describe('Webpack Integration test', () => {
-    testCase.forEach((value) => {
-        it('#test webpack integration case: ' + value, (done) => {
-            const configPath = path.join('../test/fixtures/', value, '/webpack.config.js');
-            const outputDirectory = path.join('/fixtures/', value, '/dest');
-            const options = require(configPath);
-            for (const chunk of Object.keys(options.entry))
-                options.entry[chunk] = path.join(__dirname, '/fixtures/', value, options.entry[chunk]);
-
-            webpack(options, (err, stats) => {
-                if (err)
-                    return done(err);
-                if (stats.hasErrors())
-                    return done(new Error(stats.toString()));
-                // todo checkout result file context
-                done();
-            });
+describe('Webpack Integration Tests', () => {
+    cases.forEach((caseName) => {
+        it('#test webpack integration case: ' + caseName, (done) => {
+            runWebpack(caseName, { casesPath: path.resolve(__dirname, './cases') }, done);
         });
     });
 });
